@@ -1,0 +1,76 @@
+{
+  "name": "pylibmaster",
+  "version": "1.5.14",
+  "description": "Python 库管理工具",
+  "main": "main.js",
+  "author": "SoftheartedYYC",
+  "email": "1247449619@qq.com",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --require ./tests/bootstrap.js --test tests/**/*.test.js",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "dist": "npm run build:win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "glob": "^11.0.0",
+    "strip-ansi": "^6.0.1"
+  },
+  "dependencyNotes": {
+    "strip-ansi": "Locked at ^6.0.1 because 7+ is ESM-only and incompatible with CommonJS require()"
+  },
+  "build": {
+    "appId": "com.softheartedyyc.pylibmaster",
+    "productName": "PyLibMaster",
+    "icon": "renderer/icon.ico",
+    "directories": {
+      "output": "dist"
+    },
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "core/**/*",
+      "utils/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "icon": "renderer/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "renderer/icon.ico",
+      "uninstallerIcon": "renderer/icon.ico",
+      "installerHeaderIcon": "renderer/icon.ico",
+      "installerSidebar": null,
+      "uninstallerSidebar": null
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "SoftheartedYYC",
+      "repo": "PyLibMaster"
+    }
+  }
+}

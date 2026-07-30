@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyLibMaster</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="titlebar-logo" style="-webkit-app-region: no-drag;">
+    <div class="titlebar-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="titlebar-logo-text">PyLibMaster</div>
+  </div>
+  <div class="titlebar-actions">
+    <button class="titlebar-btn" id="btn-global-refresh" onclick="refreshCurrentPage()" title="Refresh">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+    </button>
+    <button class="titlebar-btn" onclick="window.electronAPI.windowMinimize()" title="Minimize">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14"/></svg>
+    </button>
+    <button class="titlebar-btn" onclick="window.electronAPI.windowMaximize()" title="Maximize">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+    </button>
+    <button class="titlebar-btn" onclick="window.electronAPI.windowClose()" title="Close">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="main-layout">
+  <div class="sidebar">
+    <div class="sidebar-nav">
+      <div class="sidebar-group-label" data-i18n="nav.core">核心操作</div>
+      <div class="sidebar-item active" data-page="install">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        <span data-i18n="nav.install">安装库</span>
+      </div>
+      <div class="sidebar-item" data-page="uninstall">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+        <span data-i18n="nav.uninstall">卸载库</span>
+      </div>
+      <div class="sidebar-item" data-page="update">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        <span data-i18n="nav.update">更新库</span>
+      </div>
+      <div class="sidebar-item" data-page="query">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span data-i18n="nav.query">查询库</span>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-group-label" data-i18n="nav.config">配置管理</div>
+      <div class="sidebar-item" data-page="mirror">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span data-i18n="nav.mirror">镜像源</span>
+      </div>
+      <div class="sidebar-item" data-page="env">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+        <span data-i18n="nav.env">环境选择</span>
+      </div>
+      <div class="sidebar-item" data-page="logs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        <span data-i18n="nav.logs">操作日志</span>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-group-label" data-i18n="nav.system">系统</div>
+      <div class="sidebar-item" data-page="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span data-i18n="nav.settings">设置</span>
+      </div>
+      <div class="sidebar-item" data-page="about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span data-i18n="nav.about">关于</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-env">
+        <div class="sidebar-env-dot" id="sb-env-dot" style="background:var(--tag-danger)"></div>
+        <div class="sidebar-env-name" id="sb-env-name">未检测到 Python 版本</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Install page -->
+    <div class="page active" id="page-install">
+      <div class="page-header" data-i18n="install.title">安装库</div>
+      <div class="page-desc" data-i18n="install.desc">搜索、安装 Python 库，支持拖拽批量安装</div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.installed">已安装</div><div class="stat-value" id="stat-installed">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.updates">有更新</div><div class="stat-value warn" id="stat-updates">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.today">今日安装</div><div class="stat-value ok" id="stat-today">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.mirrors">镜像源</div><div class="stat-value accent" id="stat-mirrors">0</div></div>
+      </div>
+
+      <div class="search-bar">
+        <input class="search-input" type="text" id="install-search" data-i18n-placeholder="install.search" placeholder="输入需要安装库的名称，多个库以空格间隔开" onkeydown="if(event.key==='Enter')startInstall()">
+        <button class="btn btn-primary" id="btn-do-install" onclick="startInstall()"><span class="spinner"></span><span data-i18n="btn.install">安装</span></button>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div class="dropzone-text" data-i18n="install.drop">拖拽 requirements.txt 或 .whl 文件到此处</div>
+        <div class="dropzone-sub" data-i18n="install.dropSub">或点击选择文件</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="install.options">安装选项</div>
+        <div class="install-options">
+          <div class="option-group">
+            <label data-i18n="install.version">版本控制</label>
+            <select id="install-version-mode">
+              <option value="latest" data-i18n="install.latest">最新版本</option>
+              <option value="specific" data-i18n="install.specific">指定版本</option>
+              <option value="range" data-i18n="install.range">版本范围</option>
+            </select>
+          </div>
+          <div class="option-group" id="version-input-group" style="display:none;">
+            <label data-i18n="install.versionNum">指定版本号</label>
+            <input type="text" id="install-version-num" data-i18n-placeholder="install.versionHint" placeholder="例如: 1.26.4">
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="opt-parallel" checked> <span data-i18n="install.parallel">并行安装 (多线程)</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="opt-retry" checked> <span data-i18n="install.retry">智能重试</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="opt-rollback" checked> <span data-i18n="install.rollback">安装失败自动回滚</span></label>
+        </div>
+      </div>
+
+      <div id="install-progress" style="display:none;">
+        <div class="card">
+          <div class="card-title-sm" data-i18n="install.progress">安装进度</div>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label" id="progress-name">...</span>
+              <span class="progress-pct" id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="progress-stats">
+              <span id="progress-count">0 / 0</span>
+              <span id="progress-status" data-i18n="install.running">运行中</span>
+            </div>
+            <div class="progress-actions" style="margin-top:12px; text-align:right;">
+              <button class="btn btn-sm btn-danger" id="btn-cancel-install" onclick="cancelCurrentOperation()" data-i18n="btn.cancel">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="install-log" class="install-log" style="display:none;"></div>
+    </div>
+
+    <!-- Uninstall page -->
+    <div class="page" id="page-uninstall">
+      <div class="page-header" data-i18n="uninstall.title">卸载库</div>
+      <div class="page-desc" data-i18n="uninstall.desc">安全地卸载不需要的 Python 库</div>
+
+      <div class="search-bar">
+        <input class="search-input" type="text" id="uninstall-search" data-i18n-placeholder="uninstall.search" placeholder="搜索已安装的库...">
+        <button class="btn btn-danger" id="btn-batch-uninstall" onclick="batchUninstall()" disabled><span class="spinner"></span><span data-i18n="btn.batchUninstall">批量卸载</span></button>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="uninstall.options">卸载选项</div>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="uninstall-safe" checked> <span data-i18n="uninstall.safe">安全模式 (仅卸载指定库)</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="uninstall-backup" checked> <span data-i18n="uninstall.backup">卸载前创建备份</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="uninstall-rollback" checked> <span data-i18n="uninstall.rollback">卸载失败自动回滚</span></label>
+        </div>
+        <div class="action-bar" style="margin-top:14px; margin-bottom:0;">
+          <span class="selection-info" id="uninstall-selection-info"></span>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px; padding-left:20px;"><input type="checkbox" id="select-all" onclick="toggleSelectAll()"></th>
+                <th data-i18n="col.name">库名称</th>
+                <th data-i18n="col.version">版本</th>
+                <th data-i18n="col.installed">安装时间</th>
+                <th data-i18n="col.size">大小</th>
+                <th data-i18n="col.status">状态</th>
+                <th style="width:90px;" data-i18n="col.action">操作</th>
+              </tr>
+            </thead>
+            <tbody id="uninstall-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="uninstall-empty" style="display:none;">
+          <div class="empty-state-text" data-i18n="empty.title">没有匹配的库</div>
+          <div class="empty-state-sub" data-i18n="empty.sub">尝试调整搜索条件</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update page -->
+    <div class="page" id="page-update">
+      <div class="page-header" data-i18n="update.title">更新库</div>
+      <div class="page-desc" data-i18n="update.desc">检查并安装可用的库更新</div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="update.options">更新选项</div>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="opt-update-parallel" checked> <span data-i18n="update.parallel">并行更新 (多线程)</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="opt-update-retry" checked> <span data-i18n="update.retry">智能重试</span></label>
+          <label class="checkbox-label"><input type="checkbox" checked> <span data-i18n="update.compare">显示更新前后版本对比</span></label>
+          <label class="checkbox-label"><input type="checkbox" id="opt-update-rollback" checked> <span data-i18n="update.rollback">更新失败自动回滚</span></label>
+        </div>
+        <div class="action-bar" style="margin-top:14px; margin-bottom:0;">
+          <button class="btn btn-primary" id="btn-update-all" onclick="updateAll()"><span class="spinner"></span><span data-i18n="btn.updateAll">全部更新</span></button>
+          <button class="btn" onclick="checkUpdates()" id="btn-check-update"><span class="spinner"></span><span data-i18n="btn.checkUpdate">检查更新</span></button>
+        </div>
+      </div>
+
+      <div class="search-bar" style="margin-bottom:12px;">
+        <input class="search-input" type="text" id="update-search" data-i18n-placeholder="update.search" placeholder="搜索库名称..." oninput="renderUpdateTable()">
+        <span id="update-selection-info" style="margin-left:12px; color:var(--text-secondary); font-size:13px;"></span>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px; padding-left:20px;"><input type="checkbox" id="update-select-all" onclick="toggleUpdateSelectAll()"></th>
+                <th data-i18n="col.name">库名称</th>
+                <th data-i18n="col.current">当前版本</th>
+                <th data-i18n="col.latest">最新版本</th>
+                <th data-i18n="col.date">发布日期</th>
+                <th style="width:90px;" data-i18n="col.action">操作</th>
+              </tr>
+            </thead>
+            <tbody id="update-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="update-empty" style="display:none;">
+          <div class="empty-state-text" data-i18n="update.allLatest">所有库都是最新版本</div>
+          <div class="empty-state-sub" data-i18n="update.allLatestSub">没有可用的更新</div>
+        </div>
+      </div>
+
+      <div id="update-progress" style="display:none;">
+        <div class="card">
+          <div class="card-title-sm" data-i18n="update.progress">更新进度</div>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label" id="update-progress-name">...</span>
+              <span class="progress-pct" id="update-progress-pct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="update-progress-fill" style="width:0%"></div></div>
+            <div class="progress-stats">
+              <span id="update-progress-count">0 / 0</span>
+              <span id="update-progress-status" data-i18n="install.running">运行中</span>
+            </div>
+            <div class="progress-actions" style="margin-top:12px; text-align:right;">
+              <button class="btn btn-sm btn-danger" id="btn-cancel-update" onclick="cancelCurrentOperation()" data-i18n="btn.cancel">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="update-log" class="install-log" style="display:none;"></div>
+    </div>
+
+    <!-- Query page -->
+    <div class="page" id="page-query">
+      <div class="page-header" data-i18n="query.title">查询库</div>
+      <div class="page-desc" data-i18n="query.desc">按多种条件筛选和搜索已安装的库</div>
+
+      <div class="filter-row">
+        <input class="search-input" type="text" id="query-search" data-i18n-placeholder="query.search" placeholder="搜索库名称..." style="flex:1; min-width:180px;">
+        <select id="query-status-filter">
+          <option value="all" data-i18n="query.allVersions">所有状态</option>
+          <option value="latest" data-i18n="query.installed">已安装</option>
+          <option value="update" data-i18n="query.hasUpdate">有更新</option>
+        </select>
+        <select id="query-sort">
+          <option value="time-desc" data-i18n="query.timeDesc">安装时间 (新→旧)</option>
+          <option value="time-asc" data-i18n="query.timeAsc">安装时间 (旧→新)</option>
+          <option value="name-asc" data-i18n="query.nameAsc">名称 (A→Z)</option>
+          <option value="size-desc" data-i18n="query.sizeDesc">大小 (大→小)</option>
+        </select>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="col.name">库名称</th>
+                <th data-i18n="col.version">版本</th>
+                <th data-i18n="col.installed">安装时间</th>
+                <th data-i18n="col.size">大小</th>
+                <th data-i18n="col.source">来源</th>
+                <th data-i18n="col.status">状态</th>
+              </tr>
+            </thead>
+            <tbody id="query-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="query-empty" style="display:none;">
+          <div class="empty-state-text" data-i18n="empty.title">没有匹配的库</div>
+          <div class="empty-state-sub" data-i18n="empty.sub">尝试调整搜索条件</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mirror page -->
+    <div class="page" id="page-mirror">
+      <div class="page-header" data-i18n="mirror.title">镜像源管理</div>
+      <div class="page-desc" data-i18n="mirror.desc">管理 PyPI 镜像源，自动选择最优线路</div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="mirror.list">镜像源列表</div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="btn btn-sm" id="btn-test-speed" onclick="testAllMirrors()"><span class="spinner"></span><span data-i18n="btn.testSpeed">全部测速</span></button>
+        </div>
+        <div id="mirror-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="setting-row" style="border-bottom:none; padding-top:0; padding-bottom:0;">
+          <div>
+            <div class="setting-label" data-i18n="mirror.smartRoute">智能路由</div>
+            <div class="setting-desc" data-i18n="mirror.smartRouteDesc">根据网络状况自动选择最优镜像源</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-smart-route" checked onchange="toggleSmartRoute()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="mirror.custom">自定义镜像源</div>
+        <div class="search-bar" style="margin-bottom:0;">
+          <input class="search-input" type="text" id="custom-mirror-name" style="flex:1;" data-i18n-placeholder="mirror.name" placeholder="名称" onkeydown="if(event.key==='Enter')addCustomMirror()">
+          <input class="search-input" type="text" id="custom-mirror-url" style="flex:2;" data-i18n-placeholder="mirror.customHint" placeholder="输入镜像源地址，例如: https://pypi.tuna.tsinghua.edu.cn/simple/" onkeydown="if(event.key==='Enter')addCustomMirror()">
+          <input class="search-input" type="text" id="custom-mirror-remark" style="flex:1;" data-i18n-placeholder="mirror.remarkHint" placeholder="备注（可选）" onkeydown="if(event.key==='Enter')addCustomMirror()">
+          <button class="btn btn-sm btn-primary" onclick="addCustomMirror()" data-i18n="btn.add">添加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Env page -->
+    <div class="page" id="page-env">
+      <div class="page-header" data-i18n="env.title">环境选择</div>
+      <div class="page-desc" data-i18n="env.desc">选择要操作的 Python 环境</div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="env.pythonEnv">Python 环境</div>
+        <div id="env-list"></div>
+      </div>
+    </div>
+
+    <!-- Logs page -->
+    <div class="page" id="page-logs">
+      <div class="page-header" data-i18n="logs.title">操作日志</div>
+      <div class="page-desc" data-i18n="logs.desc">查看所有安装、卸载和更新操作的记录</div>
+
+      <div class="filter-row">
+        <select id="log-type-filter">
+          <option value="all" data-i18n="logs.allTypes">全部类型</option>
+          <option value="install" data-i18n="logs.install">安装</option>
+          <option value="uninstall" data-i18n="logs.uninstall">卸载</option>
+          <option value="update" data-i18n="logs.update">更新</option>
+        </select>
+        <input class="search-input" type="text" id="log-search" data-i18n-placeholder="logs.search" placeholder="搜索日志..." style="flex:1; min-width:160px;">
+        <button class="btn btn-sm" onclick="clearLogs()" data-i18n="btn.clearLogs">清空日志</button>
+      </div>
+
+      <div class="card" id="log-entries"></div>
+      <div class="empty-state" id="logs-empty" style="display:none;">
+        <div class="empty-state-text" data-i18n="logs.empty">暂无日志</div>
+        <div class="empty-state-sub" data-i18n="logs.emptySub">执行操作后会在这里显示记录</div>
+      </div>
+    </div>
+
+    <!-- Settings page -->
+    <div class="page" id="page-settings">
+      <div class="page-header" data-i18n="settings.title">设置</div>
+      <div class="page-desc" data-i18n="settings.desc">自定义 PyLibMaster 的外观和行为</div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="settings.appearance">外观</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.theme">主题</div>
+            <div class="setting-desc" data-i18n="settings.themeDesc">切换浅色或深色主题</div>
+          </div>
+          <div class="theme-options" id="theme-options">
+            <div class="theme-opt active" data-theme="light" data-i18n="theme.light">浅色</div>
+            <div class="theme-opt" data-theme="dark" data-i18n="theme.dark">深色</div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.language">多语言支持</div>
+            <div class="setting-desc" data-i18n="settings.languageDesc">选择界面显示语言</div>
+          </div>
+          <div class="theme-options" id="lang-options">
+            <div class="theme-opt active" data-lang="zh">简体中文</div>
+            <div class="theme-opt" data-lang="en">English</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="settings.storage">存储</div>
+        <div class="setting-row" style="align-items:flex-start;">
+          <div>
+            <div class="setting-label" data-i18n="settings.path">库安装路径</div>
+            <div class="setting-desc" data-i18n="settings.pathDesc">路径默认保存在文档文件夹中的Python库安装里面</div>
+            <div id="setting-path" style="margin-top:6px; font-family:monospace; font-size:11px; color:var(--text-secondary); word-break:break-all;"></div>
+          </div>
+          <button class="btn btn-sm" onclick="browseStoragePath()" data-i18n="btn.browse">浏览...</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="settings.mirrors">镜像源</div>
+        <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
+          <div>
+            <div class="setting-label" data-i18n="settings.restoreMirrors">恢复默认镜像源</div>
+            <div class="setting-desc" data-i18n="settings.restoreMirrorsDesc">重置内置镜像源并保留自定义镜像源</div>
+          </div>
+          <button class="btn btn-sm" onclick="restoreDefaultMirrorsSettings()" data-i18n="btn.restore">恢复默认</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="settings.advanced">高级</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.threads">并行安装线程数</div>
+            <div class="setting-desc" data-i18n="settings.threadsDesc">多线程并行安装多个库，大幅提升效率</div>
+          </div>
+          <select id="setting-threads" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
+            <option>2</option><option selected>4</option><option>8</option><option>16</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.retry">智能重试次数</div>
+            <div class="setting-desc" data-i18n="settings.retryDesc">如果这个镜像源无法安装就换一个镜像源再安装</div>
+          </div>
+          <select id="setting-retry" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
+            <option>1</option><option selected>3</option><option>5</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- About page -->
+    <div class="page" id="page-about">
+      <div class="about-center">
+        <div class="about-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="about-name">PyLibMaster</div>
+        <div class="about-ver">v0.1.0-alpha</div>
+        <div class="about-update">
+          <div class="about-update-status" id="about-update-status"></div>
+          <div class="about-update-actions">
+            <button class="btn btn-sm" id="btn-check-update" onclick="checkAppUpdate()" data-i18n="btn.checkUpdate">检查更新</button>
+            <button class="btn btn-sm btn-primary" id="btn-install-update" onclick="installAppUpdate()" style="display:none;" data-i18n="btn.installUpdate">立即安装</button>
+          </div>
+          <div class="about-update-progress" id="about-update-progress" style="display:none;">
+            <div class="about-update-bar" id="about-update-bar"></div>
+          </div>
+        </div>
+        <div class="about-info">
+          <span data-i18n="about.author">作者</span>: SoftheartedYYC<br>
+          <span data-i18n="about.contact">联系方式</span>: <a href="mailto:1247449619@qq.com">1247449619@qq.com</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="statusbar">
+  <div class="statusbar-item">
+    <div class="statusbar-dot"></div>
+    <span id="sb-installed-text"></span>
+  </div>
+  <div class="statusbar-item">
+    <div class="statusbar-dot update"></div>
+    <span id="sb-updates-text"></span>
+  </div>
+  <div class="statusbar-item statusbar-right">
+    <span id="sb-python-ver"></span>
+  </div>
+</div>
+
+<div class="modal-overlay" id="backup-modal">
+  <div class="modal">
+    <div class="modal-title" data-i18n="modal.title">创建卸载备份</div>
+    <div class="modal-text" data-i18n="modal.text">是否要在卸载前创建备份？如果卸载导致问题，可以从备份恢复。</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('backup-modal')" data-i18n="btn.cancel">取消</button>
+      <button class="btn btn-primary" onclick="confirmBackup()" data-i18n="btn.confirmBackup">确认备份并卸载</button>
+      <button class="btn btn-danger" onclick="forceUninstall()" data-i18n="btn.skipBackup">跳过备份</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
