@@ -1,6 +1,6 @@
 {
   "name": "pylibmaster",
-  "version": "1.5.15",
+  "version": "1.5.16",
   "description": "Python 库管理工具",
   "main": "main.js",
   "author": "SoftheartedYYC",
@@ -64,8 +64,9 @@
       "installerIcon": "renderer/icon.ico",
       "uninstallerIcon": "renderer/icon.ico",
       "installerHeaderIcon": "renderer/icon.ico",
-      "installerSidebar": null,
-      "uninstallerSidebar": null
+      "installerSidebar": "build/installerSidebar.bmp",
+      "uninstallerSidebar": "build/installerSidebar.bmp",
+      "license": "build/license.txt"
     },
     "publish": {
       "provider": "github",
