@@ -1,21 +1,56 @@
-MIT License
+PyLibMaster 非商业免费许可证
+PyLibMaster Non-Commercial Free License
+
+版权所有 (c) 2026 SoftheartedYYC
+
+本软件（包括源代码及相关文档）免费向公众提供，但须遵守以下条款：
+
+1. 授权范围
+   任何人可免费复制、使用、修改和分发本软件，但仅限于个人学习、
+   研究或其他非商业目的。
+
+2. 商业使用限制
+   未经版权所有者事先书面授权，任何个人或组织不得将本软件（或其
+   修改版、衍生作品）用于任何商业目的，包括但不限于：销售、出租、
+   商业运营、集成到商业产品或服务等。
+
+3. 署名要求
+   复制、分发或修改本软件时，必须保留本许可证及原始版权声明，
+   并注明软件来源。
+
+4. 免责声明
+   本软件按"原样"提供，不附带任何明示或暗示的保证。在任何情况
+   下，作者均不对因使用本软件而产生的任何损害承担责任。
+
+如需商业授权，请联系：1247449619@qq.com
+
+====================================================================
 
 Copyright (c) 2026 SoftheartedYYC
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software (including source code and related documentation) is
+provided free of charge, subject to the following terms:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Grant of License
+   Anyone may copy, use, modify, and distribute this software free of
+   charge, solely for personal study, research, or other non-commercial
+   purposes.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Commercial Use Restriction
+   Without prior written authorization from the copyright owner, no
+   individual or organization may use this software (or any modified
+   version or derivative work thereof) for any commercial purpose,
+   including but not limited to: sale, rental, commercial operation,
+   or integration into commercial products or services.
+
+3. Attribution
+   When copying, distributing, or modifying this software, you must
+   retain this license and the original copyright notice, and indicate
+   the source of the software.
+
+4. Disclaimer
+   THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+   DAMAGES ARISING FROM THE USE OF THIS SOFTWARE.
+
+For commercial licensing, please contact: 1247449619@qq.com

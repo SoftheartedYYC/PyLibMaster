@@ -5,7 +5,7 @@
   "main": "main.js",
   "author": "SoftheartedYYC",
   "email": "1247449619@qq.com",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "start": "electron .",
     "test": "node --require ./tests/bootstrap.js --test tests/**/*.test.js",

@@ -3,7 +3,7 @@
 > 一款基于 Electron 的 Python 库管理桌面工具，让你以图形化界面轻松管理 Python 第三方库。
 
 [![Version](https://img.shields.io/badge/version-1.5.14-blue)]()
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-非商业免费-orange)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)]()
 
 ## ✨ 功能特性
@@ -83,4 +83,10 @@ PyLibMaster/
 
 ## 📄 许可证
 
-[MIT](LICENSE) © SoftheartedYYC
+本项目采用 **非商业免费许可证**：
+
+- ✅ 个人学习、研究等非商业目的：**完全免费**，可自由使用、修改、分发
+- ❌ **禁止任何商业用途**（销售、出租、商业运营、集成到商业产品等）
+- 商业使用需获得作者书面授权，请联系：1247449619@qq.com
+
+详见 [LICENSE](LICENSE)。
