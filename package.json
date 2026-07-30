@@ -64,8 +64,6 @@
       "installerIcon": "renderer/icon.ico",
       "uninstallerIcon": "renderer/icon.ico",
       "installerHeaderIcon": "renderer/icon.ico",
-      "installerSidebar": "build/installerSidebar.bmp",
-      "uninstallerSidebar": "build/installerSidebar.bmp",
       "license": "build/license.txt"
     },
     "publish": {
