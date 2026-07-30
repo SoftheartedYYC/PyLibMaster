@@ -38,3 +38,7 @@ Thumbs.db
 
 # 本地发布脚本（不上传 GitHub）
 release.js
+
+# 临时/调试文件（图标排查、侧边栏预览等）
+_*.png
+_*.ico
