@@ -20,6 +20,7 @@ yarn-error.log*
 # Runtime / cache
 .workbuddy/
 .cache/
+.qoder/
 
 # OS files
 .DS_Store
@@ -34,3 +35,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# 本地发布脚本（不上传 GitHub）
+release.js
