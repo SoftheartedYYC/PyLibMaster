@@ -112,13 +112,68 @@ npm test
 
 > 应用主界面采用现代化无边框设计，支持浅色 / 深色主题。
 
-<div align="center">
-
-<img src="docs/images/screenshot.png" alt="PyLibMaster 安装库界面截图" width="90%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);" />
-
-*安装库页面 — 支持搜索安装、拖拽批量安装、并行安装与智能重试*
-
-</div>
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/screenshot.png" alt="安装库" width="100%" />
+      <br/><sub>安装库 — 搜索安装、拖拽批量安装</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/uninstall.png" alt="卸载库" width="100%" />
+      <br/><sub>卸载库 — 安全模式、备份与回滚</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/update.png" alt="更新库" width="100%" />
+      <br/><sub>更新库 — 检查更新、定时自动更新</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/query.png" alt="查询库" width="100%" />
+      <br/><sub>查询库 — 多条件筛选与搜索</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/pypi.png" alt="PyPI 浏览" width="100%" />
+      <br/><sub>PyPI 浏览 — 搜索包并一键安装</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/template.png" alt="项目模板" width="100%" />
+      <br/><sub>项目模板 — 环境快照与回滚</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/mirror.png" alt="镜像源管理" width="100%" />
+      <br/><sub>镜像源管理 — 内置国内镜像与智能路由</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/env.png" alt="环境选择" width="100%" />
+      <br/><sub>环境选择 — 多环境切换与虚拟环境</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/log.png" alt="操作日志" width="100%" />
+      <br/><sub>操作日志 — 完整记录与导出</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/stats.png" alt="数据统计" width="100%" />
+      <br/><sub>数据统计 — 操作综合统计</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/toolbox.png" alt="工具箱" width="100%" />
+      <br/><sub>工具箱 — 依赖图谱、空间分析、环境对比</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/settings.png" alt="设置" width="100%" />
+      <br/><sub>设置 — 主题、语言、通知与托盘</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
