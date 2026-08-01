@@ -1,0 +1,1 @@
+Electron 31.7.7 with CommonJS modules; electron-builder for NSIS Windows packaging; electron-updater for GitHub Releases updates; glob and strip-ansi as runtime dependencies. All child modules (core, renderer) are bundled under `renderer/**/*` and `core/**/*` by electron-builder.

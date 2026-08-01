@@ -1,0 +1,5 @@
+- IPC channels follow a `<domain>:<action>` naming convention (e.g. `pip:install`, `env:switch`, `mirror:testAll`) consistently across `main.js` handlers and `preload.js` wrappers.
+- Long-running operations accept a callback `(data, type) => event.sender.send('pip:progress', { operation, data, type })` to stream progress back to the renderer.
+- Renderer-facing APIs are exposed exclusively through `contextBridge.exposeInMainWorld('electronAPI', {...})` in `preload.js`; the renderer never requires Node modules directly.
+- BrowserWindow is created with `contextIsolation: true`, `nodeIntegration: false`, and a `preload` script — no other window creation bypasses these security settings.
+- Each core feature lives in its own `core/<domain>/<manager>.js` module and is imported once at the top of `main.js`, then invoked by matching IPC handlers.

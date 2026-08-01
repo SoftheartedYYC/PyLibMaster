@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: ""
+title: PyLibMaster Electron Application
+scope:
+    - main.js
+    - preload.js
+    - package.json
+    - package-lock.json
+    - .gitignore
+    - LICENSE
+    - README.md
+source_files: []
+depends_on: []
+related_to: []

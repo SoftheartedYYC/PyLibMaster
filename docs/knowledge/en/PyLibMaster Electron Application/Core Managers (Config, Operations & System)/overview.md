@@ -1,0 +1,1 @@
+Electron-based core module providing persistent configuration, PyPI mirror management, Python environment discovery, pip package operations (install/uninstall/update with rollback), security auditing, backup/restore, virtualenv management, Windows explorer integration, logging, and application updates.

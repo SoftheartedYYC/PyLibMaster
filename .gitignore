@@ -8,8 +8,7 @@ dist_*/
 # Tests (只保留核心代码，不上传测试相关)
 tests/
 
-# Documentation & test reports
-docs/
+# Test reports (docs/ 目录保留上传)
 
 # Logs
 *.log

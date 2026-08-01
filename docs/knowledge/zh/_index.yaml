@@ -1,0 +1,44 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: zh-CN
+branch: main
+nodes_managed: true
+exported_at: "2026-08-01T09:28:16Z"
+modules:
+    "":
+        dir_name: PyLibMaster Electron 应用根工程
+        title: PyLibMaster Electron 应用根工程
+        scope:
+            - .gitignore
+            - package.json
+            - package-lock.json
+            - LICENSE
+            - README.md
+            - main.js
+            - preload.js
+        source_files: []
+        children:
+            - core
+            - renderer
+        depends_on: []
+        related_to: []
+    core:
+        dir_name: 核心业务与系统管理模块
+        title: 核心业务与系统管理模块
+        scope:
+            - core/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: renderer
+    renderer:
+        dir_name: PyLibMaster 渲染进程界面（Electron 前端）
+        title: PyLibMaster 渲染进程界面（Electron 前端）
+        scope:
+            - renderer/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: core

@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: core
+title: 核心业务与系统管理模块
+scope:
+    - core/
+source_files: []
+depends_on: []
+related_to:
+    - path: renderer
