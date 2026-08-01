@@ -11,7 +11,7 @@
   <a href="https://github.com/SoftheartedYYC/PyLibMaster/releases"><img src="https://img.shields.io/github/v/release/SoftheartedYYC/PyLibMaster?color=0969DA&label=version&logo=github" alt="Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-%E9%9D%9E%E5%95%86%E4%B8%9A%E5%85%8D%E8%B4%B9-orange" alt="License" /></a>
   <img src="https://img.shields.io/badge/platform-Windows-0078D4?logo=windows" alt="Platform" />
-  <img src="https://img.shields.io/badge/node-%3E%3D18-339933?logo=nodedotjs" alt="Node" />
+  <img src="https://img.shields.io/badge/node-%3E%3D24-339933?logo=nodedotjs" alt="Node" />
   <img src="https://img.shields.io/badge/electron-v31-47848F?logo=electron" alt="Electron" />
 </p>
 
