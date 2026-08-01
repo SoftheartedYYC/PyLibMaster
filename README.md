@@ -81,7 +81,7 @@ PyLibMaster 是一款基于 **Electron** 开发的 Windows 桌面应用，让你
 ### 方式一：下载安装（推荐）
 
 1. 访问 [Releases](https://github.com/SoftheartedYYC/PyLibMaster/releases) 页面
-2. 下载 `PyLibMaster Setup 1.5.23.exe`
+2. 下载 `PyLibMaster Setup 1.5.24.exe`
 3. 双击安装，无需额外配置
 
 > ⚠️ 应用未做代码签名，Windows SmartScreen 可能提示 **"未知发布者"**，点击 **"仍要运行"** 即可。

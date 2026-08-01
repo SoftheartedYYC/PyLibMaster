@@ -125,29 +125,50 @@ function createWindow() {
 // ============ 应用生命周期 ============
 
 /**
- * 应用就绪时的初始化流程：
- * 1. 创建主窗口
- * 2. 初始化自动更新模块
- * 3. 启动 Python 环境检测
+ * 单实例锁：禁止同时运行多个 PyLibMaster 进程
+ * - 如果已有一个实例在运行（含托盘后台），新启动时会聚焦到已有窗口并退出自身
+ * - 防止用户多次点击快捷方式打开多个窗口/托盘
  */
-app.whenReady().then(() => {
-  createWindow();
-  createTray();             // 创建系统托盘图标
-  updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
-  envManager.startDetection();      // 后台异步检测 Python 环境
-  setupThemeSync();                 // 设置主题跟随系统
-  autoCheckUpdates();               // 启动时静默检查更新
-  schedulerManager.startScheduler((title, body) => {  // 启动定时更新调度器
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('scheduler:executed', body);
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  console.log('[single-instance] Another instance is already running, quitting.');
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    console.log('[single-instance] Second instance launched, focusing existing window.');
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      if (!mainWindow.isVisible()) mainWindow.show();
+      mainWindow.focus();
     }
   });
 
-  // macOS 点击 Dock 图标时重新创建窗口（如果没有窗口存在）
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  /**
+   * 应用就绪时的初始化流程：
+   * 1. 创建主窗口
+   * 2. 初始化自动更新模块
+   * 3. 启动 Python 环境检测
+   */
+  app.whenReady().then(() => {
+    createWindow();
+    createTray();             // 创建系统托盘图标
+    updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
+    envManager.startDetection();      // 后台异步检测 Python 环境
+    setupThemeSync();                 // 设置主题跟随系统
+    autoCheckUpdates();               // 启动时静默检查更新
+    schedulerManager.startScheduler((title, body) => {  // 启动定时更新调度器
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('scheduler:executed', body);
+      }
+    });
+
+    // macOS 点击 Dock 图标时重新创建窗口（如果没有窗口存在）
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
   });
-});
+}
 
 // 所有窗口关闭时退出应用（macOS 除外，macOS 通常保持活跃直到显式退出）
 app.on('window-all-closed', () => {
