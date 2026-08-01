@@ -5,8 +5,8 @@ node_modules/
 dist/
 dist_*/
 
-# Tests (只保留核心代码，不上传测试相关)
-tests/
+# Tests（随项目一起上传，CI 需要）
+# tests/
 
 # Test reports (docs/ 目录保留上传)
 
