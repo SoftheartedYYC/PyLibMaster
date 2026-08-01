@@ -114,7 +114,9 @@ npm test
 
 <div align="center">
 
-*(此处可补充应用截图)*
+<img src="docs/images/screenshot.png" alt="PyLibMaster 安装库界面截图" width="90%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);" />
+
+*安装库页面 — 支持搜索安装、拖拽批量安装、并行安装与智能重试*
 
 </div>
 
