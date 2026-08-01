@@ -1,0 +1,1 @@
+No build step — the renderer is served directly by Electron's main process. The script load order in `index.html` is strict and must be preserved because each module depends on globals from earlier files. A Content Security Policy meta tag enforces same-origin loading for scripts and styles.

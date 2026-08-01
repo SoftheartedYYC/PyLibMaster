@@ -1,1 +1,1 @@
-Electron desktop application that wires a Node.js main process and preload bridge to a renderer UI, exposing all core Python package management capabilities through typed IPC channels.
+Electron application shell that wires the renderer GUI, core Python-package-management services, and test suite together through a single preload bridge exposing an IPC API surface.

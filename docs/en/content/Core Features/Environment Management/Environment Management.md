@@ -9,7 +9,15 @@
 - [configManager.js](file://core/config/configManager.js)
 - [processRunner.js](file://utils/processRunner.js)
 - [templateManager.js](file://core/operations/templateManager.js)
+- [auditManager.js](file://core/operations/auditManager.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated file path references from `core/envManager.js` to `core/system/envManager.js` throughout the document
+- Updated architecture diagrams to reflect the new module organization under `core/system/`
+- Enhanced dependency analysis to show the new system manager structure
+- Updated import statements and module references to match the new location
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -27,7 +35,7 @@
 This document explains how PyLibMaster discovers Python installations across platforms, detects Anaconda/Miniconda and virtual environments, switches between them, persists configuration, and performs runtime environment changes. It also covers creating virtual environments via the GUI, template-based setup, custom options, multi-environment workflows, environment comparison tools, and export/import of requirements.txt files. Finally, it details environment-specific settings and their integration with package operations.
 
 ## Project Structure
-PyLibMaster is an Electron application. The main process orchestrates IPC handlers that delegate to core modules for environment detection, virtual environment management, pip operations, and configuration persistence.
+PyLibMaster is an Electron application. The main process orchestrates IPC handlers that delegate to core modules for environment detection, virtual environment management, pip operations, and configuration persistence. The environment management functionality has been reorganized into the system managers directory for better architectural separation.
 
 ```mermaid
 graph TB
@@ -41,6 +49,10 @@ P["core/operations/pipManager.js"]
 C["core/config/configManager.js"]
 T["core/operations/templateManager.js"]
 R["utils/processRunner.js"]
+A["core/operations/auditManager.js"]
+end
+subgraph "System Managers"
+SM["core/system/"]
 end
 M --> E
 M --> V
@@ -53,6 +65,7 @@ P --> R
 P --> C
 V --> C
 T --> R
+A --> E
 ```
 
 **Diagram sources**
@@ -61,19 +74,21 @@ T --> R
 - [venvManager.js:16-21](file://core/operations/venvManager.js#L16-L21)
 - [pipManager.js:20-28](file://core/operations/pipManager.js#L20-L28)
 - [configManager.js:17-20](file://core/config/configManager.js#L17-L20)
-- [templateManager.js:15-20](file://core/operations/templateManager.js#L15-L20)
-- [processRunner.js:13-19](file://utils/processRunner.js#L13-L19)
+- [templateManager.js:15-20](file://core/operations/templateManager.js#L15-20)
+- [processRunner.js:13-19](file://utils/processRunner.js#L13-19)
+- [auditManager.js:15-25](file://core/operations/auditManager.js#L15-L25)
 
 **Section sources**
 - [main.js:17-31](file://main.js#L17-L31)
 
 ## Core Components
-- Environment Detection and Switching: envManager.js
+- **Environment Detection and Switching**: envManager.js (now located in `core/system/envManager.js`)
 - Virtual Environment Management: venvManager.js
 - Package Operations and Requirements Tools: pipManager.js
 - Configuration Persistence: configManager.js
 - Subprocess Execution and Pip Bootstrapping: processRunner.js
 - Template-Based Setup and Snapshots: templateManager.js
+- Security Audit Integration: auditManager.js
 
 Key responsibilities:
 - Discover all usable Python interpreters (system, user, Windows Store, Conda/Miniconda).
@@ -82,22 +97,25 @@ Key responsibilities:
 - Export/import requirements.txt and compare environments.
 - Provide safe subprocess execution with timeouts, cancellation, and automatic pip installation.
 
+**Updated** The environment management functionality has been moved to the system managers directory (`core/system/envManager.js`) as part of the system managers reorganization, providing better architectural separation and consistency with other system-level components.
+
 **Section sources**
 - [envManager.js:18-24](file://core/system/envManager.js#L18-L24)
 - [venvManager.js:16-21](file://core/operations/venvManager.js#L16-L21)
 - [pipManager.js:20-28](file://core/operations/pipManager.js#L20-L28)
 - [configManager.js:17-20](file://core/config/configManager.js#L17-L20)
-- [processRunner.js:13-19](file://utils/processRunner.js#L13-L19)
-- [templateManager.js:15-20](file://core/operations/templateManager.js#L15-L20)
+- [processRunner.js:13-19](file://utils/processRunner.js#L13-19)
+- [templateManager.js:15-20](file://core/operations/templateManager.js#L15-20)
+- [auditManager.js:15-25](file://core/operations/auditManager.js#L15-L25)
 
 ## Architecture Overview
-The main process registers IPC handlers for environment and package operations. On startup, it triggers background environment detection. UI actions invoke IPC handlers which call into core modules. All file system and subprocess interactions are centralized through processRunner.js, while configuration is managed by configManager.js.
+The main process registers IPC handlers for environment and package operations. On startup, it triggers background environment detection. UI actions invoke IPC handlers which call into core modules. All file system and subprocess interactions are centralized through processRunner.js, while configuration is managed by configManager.js. The environment manager is now part of the system managers group, providing better organizational structure.
 
 ```mermaid
 sequenceDiagram
 participant UI as "Renderer UI"
 participant Main as "main.js"
-participant Env as "envManager.js"
+participant Env as "core/system/envManager.js"
 participant VEnv as "venvManager.js"
 participant Pip as "pipManager.js"
 participant Proc as "processRunner.js"
@@ -130,12 +148,12 @@ Main-->>UI : save or return content
 - [envManager.js:85-170](file://core/system/envManager.js#L85-L170)
 - [venvManager.js:73-130](file://core/operations/venvManager.js#L73-L130)
 - [pipManager.js:1104-1118](file://core/operations/pipManager.js#L1104-L1118)
-- [processRunner.js:85-161](file://utils/processRunner.js#L85-L161)
-- [configManager.js:157-162](file://core/config/configManager.js#L157-L162)
+- [processRunner.js:85-161](file://utils/processRunner.js#L85-161)
+- [configManager.js:157-162](file://core/config/configManager.js#L157-162)
 
 ## Detailed Component Analysis
 
-### Python Environment Discovery and Switching (envManager.js)
+### Python Environment Discovery and Switching (core/system/envManager.js)
 - Platform coverage:
   - Windows paths scanned via glob patterns include system-level Python, user-local installs, Windows Store Python, and Conda/Miniconda locations.
   - PATH discovery uses `where python` to find additional interpreters.
@@ -143,11 +161,13 @@ Main-->>UI : save or return content
   - Runs `python --version` and `python -m pip --version` per candidate interpreter.
   - Filters out environments without pip.
 - Naming and caching:
-  - Derives friendly names from directory structure; normalizes to “Python X.Y” when appropriate.
+  - Derives friendly names from directory structure; normalizes to "Python X.Y" when appropriate.
   - Caches discovered environments and restores previously selected environment if still valid.
 - Switching and persistence:
   - switchEnvironment updates in-memory state and persists currentEnv to config.
   - startDetection runs asynchronously on app startup.
+
+**Updated** The environment manager has been relocated to `core/system/envManager.js` as part of the system managers reorganization, maintaining all original functionality while improving architectural consistency.
 
 ```mermaid
 flowchart TD
@@ -225,7 +245,7 @@ VenvManager --> ProcessRunner : "runs commands"
 - Requirements import:
   - Installs from a requirements.txt using `pip install -r`; supports retry toggles and progress callbacks.
 - Environment comparison:
-  - Compares two environments’ installed packages and versions; returns only-in-A, only-in-B, different versions, and same counts.
+  - Compares two environments' installed packages and versions; returns only-in-A, only-in-B, different versions, and same counts.
 - Requirements diff:
   - Compares two sources (environment or file), categorizing differences and upgrades/downgrades.
 - Additional capabilities:
@@ -259,7 +279,7 @@ Main-->>UI : comparison result
 
 ### Configuration Persistence (configManager.js)
 - Storage location:
-  - Uses Electron’s userData directory; falls back to environment variables or current directory when unavailable.
+  - Uses Electron's userData directory; falls back to environment variables or current directory when unavailable.
 - Defaults and sanitization:
   - Provides default values for theme, language, storage path, parallel threads, retry count, smart route, window bounds, and currentEnv.
   - Sanitizes numeric ranges to prevent invalid configurations.
@@ -316,12 +336,12 @@ Reject --> Cleanup
 ```
 
 **Diagram sources**
-- [processRunner.js:85-161](file://utils/processRunner.js#L85-L161)
+- [processRunner.js:85-161](file://utils/processRunner.js#L85-161)
 - [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)
 - [processRunner.js:340-353](file://utils/processRunner.js#L340-L353)
 
 **Section sources**
-- [processRunner.js:85-161](file://utils/processRunner.js#L85-L161)
+- [processRunner.js:85-161](file://utils/processRunner.js#L85-161)
 - [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)
 - [processRunner.js:340-353](file://utils/processRunner.js#L340-L353)
 
@@ -354,30 +374,33 @@ Main-->>UI : progress + result
 
 **Diagram sources**
 - [main.js:557-561](file://main.js#L557-L561)
-- [templateManager.js:118-154](file://core/operations/templateManager.js#L118-L154)
+- [templateManager.js:118-154](file://core/operations/templateManager.js#L118-154)
 - [venvManager.js:73-130](file://core/operations/venvManager.js#L73-L130)
 - [pipManager.js:1127-1153](file://core/operations/pipManager.js#L1127-L1153)
 
 **Section sources**
 - [templateManager.js:23-66](file://core/operations/templateManager.js#L23-L66)
-- [templateManager.js:118-154](file://core/operations/templateManager.js#L118-L154)
+- [templateManager.js:118-154](file://core/operations/templateManager.js#L118-154)
 - [templateManager.js:175-209](file://core/operations/templateManager.js#L175-L209)
 - [templateManager.js:257-292](file://core/operations/templateManager.js#L257-L292)
 
 ## Dependency Analysis
 - main.js wires IPC handlers to core modules:
-  - env:detect, env:getCurrent, env:switch → envManager
+  - env:detect, env:getCurrent, env:switch → core/system/envManager
   - venv:create, venv:list, venv:delete, venv:info → venvManager
   - pip:export, pip:import, pip:compareEnvs, pip:diffRequirements → pipManager
   - config:get/set → configManager
 - Core modules depend on:
   - processRunner for subprocess execution and pip bootstrapping
   - configManager for storage paths and persistent settings
+  - core/system/envManager for environment detection and switching
 - Circular dependencies avoided by dynamic requires where necessary (e.g., templateManager requiring venvManager and pipManager at runtime).
+
+**Updated** The dependency structure now reflects the new location of envManager.js under core/system/, improving architectural consistency with other system-level components like logManager and explorerManager.
 
 ```mermaid
 graph LR
-Main["main.js"] --> Env["envManager.js"]
+Main["main.js"] --> Env["core/system/envManager.js"]
 Main --> Venv["venvManager.js"]
 Main --> Pip["pipManager.js"]
 Main --> Cfg["configManager.js"]
@@ -388,6 +411,7 @@ Pip --> Cfg
 Venv --> Cfg
 Tpl["templateManager.js"] --> Venv
 Tpl --> Pip
+Audit["auditManager.js"] --> Env
 ```
 
 **Diagram sources**
@@ -396,6 +420,7 @@ Tpl --> Pip
 - [venvManager.js:16-21](file://core/operations/venvManager.js#L16-L21)
 - [envManager.js:18-24](file://core/system/envManager.js#L18-L24)
 - [templateManager.js:118-154](file://core/operations/templateManager.js#L118-L154)
+- [auditManager.js:15-25](file://core/operations/auditManager.js#L15-L25)
 
 **Section sources**
 - [main.js:256-305](file://main.js#L256-L305)
@@ -413,8 +438,6 @@ Tpl --> Pip
 - I/O safety:
   - Atomic config writes reduce risk of corruption.
   - Path validations prevent expensive or unsafe operations.
-
-[No sources needed since this section provides general guidance]
 
 ## Troubleshooting Guide
 - No Python found:
@@ -439,9 +462,7 @@ Tpl --> Pip
 - [pipManager.js:1460-1503](file://core/operations/pipManager.js#L1460-L1503)
 
 ## Conclusion
-PyLibMaster provides robust cross-platform Python environment discovery, safe switching with persistent configuration, comprehensive virtual environment management, and powerful package operations including export/import and comparison. Its architecture cleanly separates concerns across IPC, core modules, and shared utilities, ensuring reliability, performance, and extensibility.
-
-[No sources needed since this section summarizes without analyzing specific files]
+PyLibMaster provides robust cross-platform Python environment discovery, safe switching with persistent configuration, comprehensive virtual environment management, and powerful package operations including export/import and comparison. Its architecture cleanly separates concerns across IPC, core modules, and shared utilities, ensuring reliability, performance, and extensibility. The recent reorganization of environment management into the system managers directory improves architectural consistency and maintainability.
 
 ## Appendices
 
@@ -455,8 +476,6 @@ PyLibMaster provides robust cross-platform Python environment discovery, safe sw
   - Use template:create or pip:import to install packages.
   - Export with pip:export or capture snapshot via template:createSnapshot.
   - Compare with pip:compareEnvs or diff with pip:diffRequirements.
-
-[No sources needed since this section provides general guidance]
 
 ### Environment-Specific Settings Integration
 - Mirror source configuration:

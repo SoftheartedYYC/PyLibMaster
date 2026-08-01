@@ -14,7 +14,20 @@
 - [utils/processRunner.js](file://utils/processRunner.js)
 - [utils/security.js](file://utils/security.js)
 - [core/system/envManager.js](file://core/system/envManager.js)
+- [tests/bootstrap.js](file://tests/bootstrap.js)
+- [tests/core.test.js](file://tests/core.test.js)
+- [tests/installPackages.test.js](file://tests/installPackages.test.js)
+- [tests/stress.test.js](file://tests/stress.test.js)
+- [tests/mocks/electron.js](file://tests/mocks/electron.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive testing infrastructure section with Node.js built-in test runner details
+- Updated Testing Strategy section with detailed mock framework and Electron mocking capabilities
+- Added Stress Testing Suite documentation with 948+ lines of comprehensive coverage
+- Enhanced Testing Environment Setup with bootstrap configuration and mock management
+- Updated CI/CD Pipeline to reflect Node.js 24 requirement and comprehensive test execution
 
 ## Table of Contents
 1. Introduction
@@ -29,7 +42,7 @@
 10. Appendices
 
 ## Introduction
-This guide documents how to set up the development environment, build and distribute PyLibMaster, understand its architecture, and extend it with custom plugins, templates, and mirror sources. It also covers coding conventions, testing strategies, CI/CD configuration, deployment procedures, and debugging techniques.
+This guide documents how to set up the development environment, build and distribute PyLibMaster, understand its architecture, and extend it with custom plugins, templates, and mirror sources. It also covers coding conventions, comprehensive testing strategies with Node.js built-in test runner, CI/CD configuration, deployment procedures, and debugging techniques.
 
 ## Project Structure
 PyLibMaster is an Electron application with a clear separation between:
@@ -38,6 +51,7 @@ PyLibMaster is an Electron application with a clear separation between:
 - Renderer (HTML/CSS/JS): UI pages, state, and user interactions
 - Core modules: business logic for pip operations, environment detection, mirrors, config, logging, backup, audit, scheduler, templates, undo, and explorer integration
 - Utilities: process runner, security helpers
+- **Testing infrastructure**: comprehensive test suite with Node.js built-in test runner, mock frameworks, and stress testing capabilities
 
 ```mermaid
 graph TB
@@ -59,6 +73,13 @@ subgraph "Utils"
 PR["utils/processRunner.js"]
 SEC["utils/security.js"]
 end
+subgraph "Testing"
+TB["tests/bootstrap.js"]
+TCORE["tests/core.test.js"]
+TINSTALL["tests/installPackages.test.js"]
+TSTRESS["tests/stress.test.js"]
+TMOCK["tests/mocks/electron.js"]
+end
 RHTML --> RAPP
 RAPP --> P
 P --> M
@@ -70,6 +91,10 @@ PIP --> PR
 PIP --> CFG
 PIP --> MIR
 M --> SEC
+TB --> TMOCK
+TCORE --> TB
+TINSTALL --> TB
+TSTRESS --> TB
 ```
 
 **Diagram sources**
@@ -83,6 +108,11 @@ M --> SEC
 - [core/system/envManager.js](file://core/system/envManager.js)
 - [utils/processRunner.js](file://utils/processRunner.js)
 - [utils/security.js](file://utils/security.js)
+- [tests/bootstrap.js](file://tests/bootstrap.js)
+- [tests/core.test.js](file://tests/core.test.js)
+- [tests/installPackages.test.js](file://tests/installPackages.test.js)
+- [tests/stress.test.js](file://tests/stress.test.js)
+- [tests/mocks/electron.js](file://tests/mocks/electron.js)
 
 **Section sources**
 - [package.json](file://package.json)
@@ -98,6 +128,7 @@ M --> SEC
 - Environment manager detects Python installations, resolves versions, and switches active environments.
 - Process runner executes commands safely with timeouts, cancellation, ANSI stripping, and pip auto-installation.
 - Security utilities enforce path allowlists to prevent traversal attacks.
+- **Testing infrastructure**: comprehensive test suite with Node.js built-in test runner, sophisticated mocking framework, and stress testing capabilities.
 
 **Section sources**
 - [main.js](file://main.js)
@@ -145,11 +176,11 @@ Bridge-->>UI : promise resolve
 ## Detailed Component Analysis
 
 ### Development Environment Setup
-- Node.js: Use Node.js 20.x as configured in CI.
+- Node.js: Use Node.js 24.x as configured in CI.
 - Dependencies: Install via npm ci or npm install.
 - Scripts:
   - Start: npm start
-  - Test: npm test
+  - Test: npm test (runs comprehensive test suite with Node.js built-in test runner)
   - Build: npm run build (electron-builder)
   - Dist Windows: npm run dist
 
@@ -170,14 +201,47 @@ Bridge-->>UI : promise resolve
 - [core/config/configManager.js](file://core/config/configManager.js)
 
 ### Testing Strategy
-- Framework: Node.js built-in test runner invoked via npm test.
-- Bootstrap: tests bootstrap via ./tests/bootstrap.js.
-- Scope: unit tests under tests/**/*.test.js.
-- CI: runs on Windows latest with Node 20, installs dependencies, then runs tests.
+
+**Updated** Comprehensive testing infrastructure implemented with Node.js built-in test runner, including sophisticated mocking capabilities and stress testing suite.
+
+#### Testing Framework and Setup
+- **Framework**: Node.js built-in test runner (`node:test`) invoked via `npm test`
+- **Bootstrap**: Tests bootstrap via `./tests/bootstrap.js` which pre-loads Electron mocks
+- **Scope**: Unit tests under `tests/**/*.test.js`, stress tests in `tests/stress/` directory
+- **CI**: Runs on Windows latest with Node 24, installs dependencies, then runs comprehensive test suite
+
+#### Mock Infrastructure
+- **Electron Mocking**: Complete Electron API mocking via `tests/mocks/electron.js`
+- **Module Interception**: Sophisticated `require.cache` manipulation for dependency injection
+- **State Management**: Centralized mock state management with reset and cleanup functions
+- **Dependency Mocking**: Mocks for processRunner, envManager, configManager, mirrorManager, backupManager, and logManager
+
+#### Test Categories
+- **Core Functionality Tests**: Package specification building, backup ID validation, security path validation
+- **Package Installation Tests**: Comprehensive install/uninstall/update scenarios with retry logic
+- **Stress Testing Suite**: 948+ lines covering edge cases, concurrent operations, memory management, and security boundaries
+- **Security Validation**: Extensive input validation testing for package names, versions, paths, and URLs
+
+#### Test Execution
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+node --require ./tests/bootstrap.js --test tests/core.test.js
+
+# Run stress tests only
+node --require ./tests/bootstrap.js --test tests/stress.test.js
+```
 
 **Section sources**
 - [package.json](file://package.json)
 - [.github/workflows/ci.yml](file://.github/workflows/ci.yml)
+- [tests/bootstrap.js](file://tests/bootstrap.js)
+- [tests/core.test.js](file://tests/core.test.js)
+- [tests/installPackages.test.js](file://tests/installPackages.test.js)
+- [tests/stress.test.js](file://tests/stress.test.js)
+- [tests/mocks/electron.js](file://tests/mocks/electron.js)
 
 ### Build and Distribution (electron-builder)
 - App ID and product name defined in package.json build section.
@@ -190,9 +254,12 @@ Bridge-->>UI : promise resolve
 - [package.json](file://package.json)
 
 ### CI/CD Pipeline
+
+**Updated** Enhanced CI pipeline with comprehensive testing and Node.js 24 support.
+
 - Triggers: push to main/master and pull requests.
 - Jobs:
-  - Test: checkout, setup Node 20, npm ci, npm test.
+  - Test: checkout, setup Node 24, npm ci, npm test (runs full test suite)
   - Build: depends on test, builds installer, uploads .exe artifact.
 
 **Section sources**
@@ -221,7 +288,7 @@ Bridge-->>UI : promise resolve
 - Renderer console: open DevTools in the browser-like renderer to inspect logs and network.
 - Main process logs: review logs exported via log:export (CSV/Markdown) and stored in storagePath.
 - IPC tracing: add console logs in main.js handlers to trace request/response payloads.
-- Process debugging: use processRunner’s onOutput to capture stdout/stderr during pip operations.
+- Process debugging: use processRunner's onOutput to capture stdout/stderr during pip operations.
 - Cancellation: cancel ongoing operations via pip:cancel with operationId.
 
 **Section sources**
@@ -237,6 +304,7 @@ High-level dependency relationships:
 - mirrorManager reads/writes config and uses processRunner for pip config generation.
 - envManager uses processRunner to detect Python and pip versions.
 - security.js provides path validation used by main for safe file operations.
+- **Testing infrastructure**: comprehensive mock system for isolating dependencies during testing.
 
 ```mermaid
 graph LR
@@ -250,6 +318,8 @@ PIP --> PR["processRunner.js"]
 PIP --> CFG
 PIP --> MIR
 MAIN --> SEC["security.js"]
+TESTS["Test Suite"] --> MOCKS["Mock Infrastructure"]
+MOCKS --> CORE["Core Modules"]
 ```
 
 **Diagram sources**
@@ -261,6 +331,8 @@ MAIN --> SEC["security.js"]
 - [core/system/envManager.js](file://core/system/envManager.js)
 - [utils/processRunner.js](file://utils/processRunner.js)
 - [utils/security.js](file://utils/security.js)
+- [tests/bootstrap.js](file://tests/bootstrap.js)
+- [tests/mocks/electron.js](file://tests/mocks/electron.js)
 
 **Section sources**
 - [main.js](file://main.js)
@@ -282,6 +354,7 @@ MAIN --> SEC["security.js"]
 - Network:
   - Mirror speed tests and smart routing minimize latency.
   - Electron download mirror configured for faster dependency fetch.
+- **Testing Performance**: Stress tests validate concurrent operations, memory usage, and resource cleanup.
 
 [No sources needed since this section provides general guidance]
 
@@ -292,6 +365,7 @@ Common issues and resolutions:
 - Slow downloads: configure alternative mirrors or enable smart routing; test speeds via mirror:testAll.
 - Operation hangs: cancel via pip:cancel with operationId; check processRunner timeout behavior.
 - Path traversal blocked: only allowed directories are permitted for opening files; adjust allowedDirs if necessary.
+- **Test failures**: Check mock state initialization, ensure proper module isolation, verify Electron mock configuration.
 
 **Section sources**
 - [utils/processRunner.js](file://utils/processRunner.js)
@@ -301,7 +375,7 @@ Common issues and resolutions:
 - [utils/security.js](file://utils/security.js)
 
 ## Conclusion
-PyLibMaster provides a robust, secure, and extensible Electron-based Python library management tool. By following the development setup, adhering to coding conventions, leveraging the provided extension points, and utilizing CI/CD and distribution tools, contributors can efficiently develop, test, and release features while maintaining reliability and performance.
+PyLibMaster provides a robust, secure, and extensible Electron-based Python library management tool with comprehensive testing infrastructure. By following the development setup, adhering to coding conventions, leveraging the provided extension points, utilizing the extensive test suite with Node.js built-in test runner, and employing CI/CD and distribution tools, contributors can efficiently develop, test, and release features while maintaining reliability and performance.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -410,3 +484,33 @@ Main --> Security : "validates paths"
 - [utils/processRunner.js](file://utils/processRunner.js)
 - [utils/security.js](file://utils/security.js)
 - [main.js](file://main.js)
+
+### Testing Infrastructure Details
+
+**Updated** Comprehensive testing framework with Node.js built-in test runner and sophisticated mocking capabilities.
+
+#### Test File Structure
+- `tests/bootstrap.js`: Bootstrap configuration for Electron mocking
+- `tests/core.test.js`: Core functionality tests (145 lines)
+- `tests/installPackages.test.js`: Package installation scenarios (270 lines)
+- `tests/stress.test.js`: Comprehensive stress testing (948 lines)
+- `tests/mocks/electron.js`: Complete Electron API mocking
+
+#### Mock Infrastructure Features
+- **Module Interception**: Uses `require.cache` manipulation for dependency injection
+- **State Management**: Centralized mock state with reset and cleanup functions
+- **Dependency Isolation**: Complete isolation of external dependencies during testing
+- **Real-time Monitoring**: Captures function calls, parameters, and return values
+
+#### Stress Testing Coverage
+- **Security Validation**: 30+ attack vectors for package names, versions, paths, and URLs
+- **Concurrent Operations**: Tests for parallel package installation and environment locking
+- **Memory Management**: Validates resource cleanup and memory leak prevention
+- **Edge Cases**: Handles null inputs, empty arrays, invalid formats, and boundary conditions
+
+**Section sources**
+- [tests/bootstrap.js](file://tests/bootstrap.js)
+- [tests/core.test.js](file://tests/core.test.js)
+- [tests/installPackages.test.js](file://tests/installPackages.test.js)
+- [tests/stress.test.js](file://tests/stress.test.js)
+- [tests/mocks/electron.js](file://tests/mocks/electron.js)

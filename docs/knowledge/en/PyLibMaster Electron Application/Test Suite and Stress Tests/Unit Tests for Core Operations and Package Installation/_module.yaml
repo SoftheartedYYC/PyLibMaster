@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: tests/unit_tests
+title: Unit Tests for Core Operations and Package Installation
+scope:
+    - tests/core.test.js
+    - tests/installPackages.test.js
+    - tests/installPackages.runCommand.test.js
+source_files: []
+depends_on: []
+related_to: []

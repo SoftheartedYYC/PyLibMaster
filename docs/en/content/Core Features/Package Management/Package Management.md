@@ -13,6 +13,13 @@
 - [undoManager.js](file://core/operations/undoManager.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated module organization references to reflect the move from `core/pipManager.js` to `core/operations/pipManager.js`
+- Maintained all existing package management functionality and features
+- Updated file path references throughout the documentation
+- Preserved all architectural diagrams and component relationships
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -26,7 +33,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains PyLibMaster’s package management system, focusing on the pip wrapper and its capabilities for installation, uninstallation, updates, parallel execution, mirror rotation, automatic rollback, progress tracking, security validation, version specification handling, error recovery, and integration with backup systems. It also provides practical workflows such as installing from requirements.txt, managing wheel files, and resolving dependency conflicts.
+This document explains PyLibMaster's package management system, focusing on the pip wrapper and its capabilities for installation, uninstallation, updates, parallel execution, mirror rotation, automatic rollback, progress tracking, security validation, version specification handling, error recovery, and integration with backup systems. It also provides practical workflows such as installing from requirements.txt, managing wheel files, and resolving dependency conflicts.
 
 ## Project Structure
 The package management subsystem is implemented across several modules:
@@ -85,14 +92,14 @@ MM --> PR
 - [undoManager.js:1-80](file://core/operations/undoManager.js#L1-L80)
 
 ## Core Components
-- pipManager: Central pip wrapper providing install/uninstall/update, file-based installs (.whl, .txt), search, listing, dependency analysis, disk usage, offline download, conflict detection, health checks, and operation cancellation.
-- mirrorManager: Manages PyPI mirror lists, default selection, speed testing, smart routing, and pip configuration writing.
-- backupManager: Creates and restores backups using pip freeze; validates backup IDs to prevent path traversal.
-- processRunner: Subprocess runner with timeout, cancellation by operationId, ANSI stripping, and ensurePip logic.
-- envManager: Detects Python environments, selects current environment, and persists selection.
-- logManager: Persistent JSON logging with capacity limits, debounced writes, and query support.
-- security: Path allowance helper to restrict access to allowed directories.
-- undoManager: Maintains an undo stack for install/uninstall/update reversals.
+- **pipManager**: Central pip wrapper providing install/uninstall/update, file-based installs (.whl, .txt), search, listing, dependency analysis, disk usage, offline download, conflict detection, health checks, and operation cancellation. Located in `core/operations/pipManager.js` after modular refactoring.
+- **mirrorManager**: Manages PyPI mirror lists, default selection, speed testing, smart routing, and pip configuration writing.
+- **backupManager**: Creates and restores backups using pip freeze; validates backup IDs to prevent path traversal.
+- **processRunner**: Subprocess runner with timeout, cancellation by operationId, ANSI stripping, and ensurePip logic.
+- **envManager**: Detects Python environments, selects current environment, and persists selection.
+- **logManager**: Persistent JSON logging with capacity limits, debounced writes, and query support.
+- **security**: Path allowance helper to restrict access to allowed directories.
+- **undoManager**: Maintains an undo stack for install/uninstall/update reversals.
 
 Key responsibilities and interactions are detailed in subsequent sections.
 
@@ -163,23 +170,23 @@ PM-->>UI : {installed, failed, operationId}
 ## Detailed Component Analysis
 
 ### pipManager: Installation, Uninstallation, Updates, File-Based Ops
-- Installation
+- **Installation**
   - Single and batch installation with optional parallelism and intelligent retries across mirrors.
   - Version modes: latest (default), specific (==version), range (>=x,<y).
   - Automatic rollback on failure when enabled; creates a backup prior to changes.
   - Progress events emitted for each package status.
-- Uninstallation
+- **Uninstallation**
   - Batch uninstall with safety checks on package names.
   - Optional backup creation and automatic rollback on failure.
-- Updates
+- **Updates**
   - Parallel update with mirror rotation and retry.
-  - Detects “Requirement already satisfied” to avoid false positives.
-- File-based operations
+  - Detects "Requirement already satisfied" to avoid false positives.
+- **File-based operations**
   - Install from .whl directly with strict path validation.
   - Install from requirements.txt with mirror rotation and retry.
-- Cancellation
+- **Cancellation**
   - Cancel ongoing pip operations by operationId.
-- Diagnostics
+- **Diagnostics**
   - List installed/outdated packages, search available versions, show package info, dependency tree, disk usage, offline download, diff requirements, full dependency graph, conflict check, health check.
 
 ```mermaid
@@ -420,14 +427,12 @@ PM --> LM["logManager.js"]
 - Log writes are debounced to reduce I/O contention.
 - Ensure pip readiness cached to avoid repeated checks.
 
-[No sources needed since this section provides general guidance]
-
 ## Troubleshooting Guide
-- pip not available: ensurePip attempts ensurepip then get-pip.py; repairPip offers explicit repair flow.
-- Timeout or hang: processRunner enforces timeouts and supports SIGTERM/SIGKILL; cancelOperation cancels by operationId.
-- Mirror connectivity: testAllMirrors and pickBestMirror help diagnose slow/unreachable mirrors.
-- Conflicts: checkConflicts parses pip check output; healthCheck aggregates issues and scores environment health.
-- Backup issues: validateBackupId guards against invalid IDs; verify backup files exist before restore.
+- **pip not available**: ensurePip attempts ensurepip then get-pip.py; repairPip offers explicit repair flow.
+- **Timeout or hang**: processRunner enforces timeouts and supports SIGTERM/SIGKILL; cancelOperation cancels by operationId.
+- **Mirror connectivity**: testAllMirrors and pickBestMirror help diagnose slow/unreachable mirrors.
+- **Conflicts**: checkConflicts parses pip check output; healthCheck aggregates issues and scores environment health.
+- **Backup issues**: validateBackupId guards against invalid IDs; verify backup files exist before restore.
 
 **Section sources**
 - [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)
@@ -437,23 +442,21 @@ PM --> LM["logManager.js"]
 - [backupManager.js:62-78](file://core/operations/backupManager.js#L62-L78)
 
 ## Conclusion
-PyLibMaster’s package management system provides robust, secure, and resilient pip operations with advanced features like parallel processing, mirror rotation, automatic rollback, progress tracking, and comprehensive diagnostics. Its modular architecture integrates environment management, configuration, logging, and subprocess orchestration to deliver a reliable user experience for common workflows such as requirements installation, wheel management, and dependency conflict resolution.
-
-[No sources needed since this section summarizes without analyzing specific files]
+PyLibMaster's package management system provides robust, secure, and resilient pip operations with advanced features like parallel processing, mirror rotation, automatic rollback, progress tracking, and comprehensive diagnostics. Its modular architecture integrates environment management, configuration, logging, and subprocess orchestration to deliver a reliable user experience for common workflows such as requirements installation, wheel management, and dependency conflict resolution.
 
 ## Appendices
 
 ### API Summary Highlights
-- installPackages(packages, options, onOutput): batch install with parallel/retry/rollback
-- installFromFile(filePath, options, onOutput): install .whl or .txt
-- uninstallPackages(packages, options, onOutput): batch uninstall with safety and rollback
-- updatePackages(packages, options, onOutput): batch update with mirror rotation and retry
-- exportRequirements(options): export current environment to requirements content
-- importRequirements(filePath, options, onOutput): install from requirements file
-- checkConflicts(): detect dependency conflicts
-- healthCheck(): comprehensive environment health report
-- downloadPackages(packages, destDir, options, onOutput): offline download
-- getFullDependencyGraph(): nodes and edges for dependency visualization
+- **installPackages(packages, options, onOutput)**: batch install with parallel/retry/rollback
+- **installFromFile(filePath, options, onOutput)**: install .whl or .txt
+- **uninstallPackages(packages, options, onOutput)**: batch uninstall with safety and rollback
+- **updatePackages(packages, options, onOutput)**: batch update with mirror rotation and retry
+- **exportRequirements(options)**: export current environment to requirements content
+- **importRequirements(filePath, options, onOutput)**: install from requirements file
+- **checkConflicts()**: detect dependency conflicts
+- **healthCheck()**: comprehensive environment health report
+- **downloadPackages(packages, destDir, options, onOutput)**: offline download
+- **getFullDependencyGraph()**: nodes and edges for dependency visualization
 
 **Section sources**
 - [pipManager.js:513-596](file://core/operations/pipManager.js#L513-L596)

@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: ""
+title: PyLibMaster Electron 桌面应用根工程
+scope:
+    - .gitignore
+    - package.json
+    - package-lock.json
+    - LICENSE
+    - README.md
+    - main.js
+    - preload.js
+source_files: []
+depends_on: []
+related_to: []

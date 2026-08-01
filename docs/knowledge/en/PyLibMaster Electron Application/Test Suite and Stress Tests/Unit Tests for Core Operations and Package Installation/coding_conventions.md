@@ -1,0 +1,5 @@
+- Each test file defines a shared `mockState` object holding stubs for envManager, configManager, mirrorManager, backupManager, processRunner, and logManager, reset by a `resetMockState()` function.
+- Module interception is performed by overwriting entries in `require.cache` inside an `injectMocks()` function, and cleaned up by deleting those entries in a corresponding `removeMocks()` function called in `beforeEach`/`afterEach`.
+- Test suites are organized as nested `describe` blocks per exported function (e.g. `buildPackageSpec`, `validateBackupId`, `isAllowedOpenPath`, `installPackages`), with each `it` block asserting a single scenario using `assert.strictEqual`, `assert.deepStrictEqual`, or `assert.rejects`.
+- Assertions on side effects inspect the `mockState` records (e.g. `mockState.processRunner.runPipCalls`, `mockState.logManager.logs`, `mockState.backupManager.restoreCalled`) rather than relying on global state.
+- Temporary filesystem fixtures are created with `fs.mkdtempSync(path.join(os.tmpdir(), ...))` and always cleaned up in a `finally` block to avoid cross-test pollution.

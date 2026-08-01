@@ -1,0 +1,1 @@
+Node.js native `node:test` (describe/it/assert) with no external test framework; mocking is done purely through `require.cache` patching rather than a library like sinon or jest.

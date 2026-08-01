@@ -11,7 +11,15 @@
 - [configManager.js](file://core/config/configManager.js)
 - [backupManager.js](file://core/operations/backupManager.js)
 - [mirrorManager.js](file://core/config/mirrorManager.js)
+- [README.md](file://README.md)
+- [ci.yml](file://github/workflows/ci.yml)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated Node.js version requirement from >=18 to >=24 in system prerequisites section
+- Added reference to CI configuration showing Node.js 24 usage
+- Updated installation instructions to reflect new Node.js requirements
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -136,7 +144,7 @@ Bridge-->>UI : Update progress UI
 ### Installation and First Launch
 - Install Node.js if not present; then run the app using the provided scripts or build a distribution.
 - On first launch, the app creates default configuration and attempts to detect Python environments.
-- If no Python is found, use the “Environment” page to add or repair pip.
+- If no Python is found, use the "Environment" page to add or repair pip.
 
 What happens behind the scenes:
 - The main process initializes the window and starts background detection for Python environments.
@@ -152,7 +160,7 @@ What happens behind the scenes:
 ### Quick Start Tutorial
 
 #### 1. Install Your First Package
-- Open the “Install” page.
+- Open the "Install" page.
 - Enter a package name (e.g., requests) and click Install.
 - Choose version mode (latest, specific, range) and enable options like parallel install, retry, and auto-rollback.
 - Watch real-time progress and cancel if needed.
@@ -168,9 +176,9 @@ Behind the scenes:
 - [pipManager.js](file://core/operations/pipManager.js)
 
 #### 2. Switch Python Environments
-- Go to the “Environment” page.
+- Go to the "Environment" page.
 - Select a detected Python environment or create a new virtual environment.
-- Optionally repair pip if it’s missing or broken.
+- Optionally repair pip if it's missing or broken.
 
 Behind the scenes:
 - envManager scans common paths and PATH entries, gathers versions, and persists the current environment.
@@ -197,16 +205,21 @@ Behind the scenes:
 ### System Requirements and Prerequisites
 - Operating Systems: Windows, macOS, Linux (Electron-based desktop app).
 - Python: At least one working Python installation with pip available.
-- Node.js: Required only if building from source; prebuilt distributions can be used directly.
+- **Node.js: Version 24 or higher required for development and building from source.**
 - Disk Space: Sufficient space for Python environments and package caches.
+
+**Updated** The Node.js version requirement has been updated from >=18 to >=24 to support the latest Electron v31 compatibility and improved performance features.
 
 Notes:
 - The app detects Python executables and validates pip availability.
 - Storage paths for logs and backups are managed automatically under the configured storage directory.
+- For development purposes, ensure your Node.js environment meets the minimum version requirement.
 
 **Section sources**
 - [envManager.js](file://core/system/envManager.js)
 - [configManager.js](file://core/config/configManager.js)
+- [README.md](file://README.md)
+- [ci.yml](file://github/workflows/ci.yml)
 
 ### Initial Configuration Setup
 - Theme and Language: Set your preferred theme (light/dark/system) and language.
@@ -261,9 +274,9 @@ MAIN --> CFG["core/config/configManager.js"]
 Common issues and resolutions:
 - No Python Detected:
   - Ensure Python is installed and accessible via PATH.
-  - Use the “Environment” page to repair pip or add a custom Python executable.
+  - Use the "Environment" page to repair pip or add a custom Python executable.
 - Pip Not Found or Broken:
-  - Use the “Repair pip” feature to reinitialize pip via ensurepip.
+  - Use the "Repair pip" feature to reinitialize pip via ensurepip.
 - Slow Downloads:
   - Enable smart routing and test mirrors to find the fastest source.
   - Write global pip config to enforce mirror selection.
@@ -271,8 +284,12 @@ Common issues and resolutions:
   - Run the app with appropriate permissions for writing to storage paths.
   - On Windows, avoid installing into protected directories.
 - Conflicts or Health Issues:
-  - Use the “Diagnostics” tool to check dependency conflicts and health score.
+  - Use the "Diagnostics" tool to check dependency conflicts and health score.
   - Review logs for detailed error messages.
+- **Node.js Version Issues:**
+  - Ensure Node.js version 24 or higher is installed for development and building.
+  - Use nvm or similar tools to manage Node.js versions if needed.
+  - Verify Node.js installation with `node --version` command.
 
 Operational tips:
 - Always keep backups enabled when performing risky operations.
@@ -296,7 +313,7 @@ PyLibMaster simplifies Python package management with a powerful GUI, robust env
 ### Platform-Specific Notes
 - Windows:
   - Installer targets NSIS x64; ensure compatibility with your system architecture.
-  - Default storage path is within the application’s userData directory.
+  - Default storage path is within the application's userData directory.
 - macOS:
   - App may require permission to access certain directories; follow prompts.
   - Global pip config is written to ~/.config/pip/pip.conf.
@@ -304,4 +321,25 @@ PyLibMaster simplifies Python package management with a powerful GUI, robust env
   - Ensure Python and pip are installed and accessible.
   - Permissions may be required for writing to system directories.
 
-[No sources needed since this section provides general guidance]
+### Development Environment Setup
+- **Node.js Requirement**: Version 24 or higher is required for development and building from source.
+- **Installation Commands**:
+  ```bash
+  # Clone repository
+  git clone https://github.com/Softheartedyyc/PyLibMaster.git
+  cd PyLibMaster
+  
+  # Install dependencies
+  npm install
+  
+  # Start development server
+  npm start
+  
+  # Build installer
+  npm run dist
+  ```
+- **CI/CD Pipeline**: Uses Node.js 24 in GitHub Actions for consistent builds.
+
+**Section sources**
+- [README.md](file://README.md)
+- [ci.yml](file://github/workflows/ci.yml)

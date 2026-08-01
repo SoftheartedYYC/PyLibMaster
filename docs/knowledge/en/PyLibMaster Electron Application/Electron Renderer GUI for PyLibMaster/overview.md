@@ -1,0 +1,1 @@
+Electron renderer-process web interface providing a multi-page GUI for Python package management, including install/uninstall/update, environment switching, mirror management, diagnostics, and settings.

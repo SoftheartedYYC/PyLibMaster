@@ -1,0 +1,1 @@
+Tests are executed with Node's built-in test runner, e.g. `node --test tests/*.test.js`. No additional test harness or configuration file is required beyond the Node runtime.

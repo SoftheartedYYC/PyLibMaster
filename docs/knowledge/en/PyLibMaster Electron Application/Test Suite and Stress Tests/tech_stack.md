@@ -1,0 +1,1 @@
+Node.js built-in `node:test` runner with `node:assert`; no external test framework. Mocking is done by hijacking `require.cache` rather than using a mocking library.

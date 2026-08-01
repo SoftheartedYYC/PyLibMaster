@@ -1,0 +1,1 @@
+Run with Node's built-in test runner (`node --test tests/*.js`). The `bootstrap.js` file must be loaded first to preload the Electron mock before any test requiring Electron-dependent modules executes.

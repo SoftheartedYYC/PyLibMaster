@@ -1,0 +1,6 @@
+- Each manager module exports an object of named functions via `module.exports = { ... }` with JSDoc `@file` and `@description` headers documenting responsibilities.
+- All disk I/O uses try/catch with fallback logging through `logManager.addLog({ action, status, type, detail })` and falls back to `console.error` when logManager is not yet initialized.
+- Configuration values are validated and sanitized before persistence using per-key range limits (e.g., `RANGE_LIMITS` in configManager) and regex patterns (e.g., `VALID_PACKAGE_NAME`, `VALID_VERSION_SPEC`).
+- Async operations accept an optional `onOutput` callback for progress streaming, emitting structured messages like `[INFO]`, `[WARN]`, `[ERR]`, and `[PROGRESS]` prefixed strings.
+- Expensive results are cached in module-scoped variables with TTL-based expiration (e.g., `SCAN_CACHE_TTL`, `SITE_PACKAGES_CACHE_TTL`) and exposed via separate getter functions.
+- Long-running operations acquire an environment-level mutex lock via `acquireEnvLock(envPath)` returning a release function called in a `finally` block to guarantee cleanup.

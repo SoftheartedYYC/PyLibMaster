@@ -1,0 +1,5 @@
+- Each test group uses a `beforeEach` that resets shared `mockState`, clears `require.cache` entries, and re-injects mocks via `injectMocks()`.
+- External dependencies are isolated by replacing their resolved paths in `require.cache` with custom exports objects rather than using a mocking library.
+- Temporary filesystem state is created via `fs.mkdtempSync(path.join(os.tmpdir(), 'pylib-*'))` and cleaned up in `afterEach`.
+- Assertions use `assert.rejects` for async error paths and `assert.strictEqual` / `assert.deepStrictEqual` for value comparisons.
+- Mock state is centralized in a single `mockState` object whose fields are reset to defaults in `resetMockState()` before every test.

@@ -3,7 +3,7 @@ schema_version: 1
 locale: en-US
 branch: main
 nodes_managed: true
-exported_at: "2026-08-01T10:03:10Z"
+exported_at: "2026-08-01T15:49:22Z"
 modules:
     "":
         dir_name: PyLibMaster Electron Application
@@ -20,11 +20,12 @@ modules:
         children:
             - core
             - renderer
+            - tests
         depends_on: []
         related_to: []
     core:
-        dir_name: Core Managers (Config, Operations & System)
-        title: Core Managers (Config, Operations & System)
+        dir_name: Core Application Services (Config, Operations & System)
+        title: Core Application Services (Config, Operations & System)
         scope:
             - core/
         source_files: []
@@ -32,9 +33,10 @@ modules:
         depends_on: []
         related_to:
             - path: renderer
+            - path: tests
     renderer:
-        dir_name: Electron Renderer UI (PyLibMaster Frontend)
-        title: Electron Renderer UI (PyLibMaster Frontend)
+        dir_name: Electron Renderer GUI for PyLibMaster
+        title: Electron Renderer GUI for PyLibMaster
         scope:
             - renderer/
         source_files: []
@@ -42,3 +44,25 @@ modules:
         depends_on: []
         related_to:
             - path: core
+    tests:
+        dir_name: Test Suite and Stress Tests
+        title: Test Suite and Stress Tests
+        scope:
+            - tests/
+        source_files: []
+        children:
+            - tests/unit_tests
+        depends_on: []
+        related_to:
+            - path: core
+    tests/unit_tests:
+        dir_name: Unit Tests for Core Operations and Package Installation
+        title: Unit Tests for Core Operations and Package Installation
+        scope:
+            - tests/core.test.js
+            - tests/installPackages.test.js
+            - tests/installPackages.runCommand.test.js
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []

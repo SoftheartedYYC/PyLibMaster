@@ -8,7 +8,15 @@
 - [configManager.js](file://core/config/configManager.js)
 - [logManager.js](file://core/system/logManager.js)
 - [main.js](file://main.js)
+- [pipManager.js](file://core/operations/pipManager.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated file paths to reflect backup manager relocation from `core/backupManager.js` to `core/operations/backupManager.js`
+- Updated import statements and module organization references
+- Enhanced architecture diagrams to show new operations layer structure
+- Updated dependency analysis to reflect new module organization
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -23,15 +31,18 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains PyLibMaster’s backup and recovery system for Python environments. It covers automated backup creation using pip freeze, the backup file format and storage structure, restore operations with force-reinstall capabilities, backup management (list/delete), and security validation against path traversal attacks. Practical workflows and best practices are included to help maintain consistent Python environments across development and production.
+This document explains PyLibMaster's backup and recovery system for Python environments. It covers automated backup creation using pip freeze, the backup file format and storage structure, restore operations with force-reinstall capabilities, backup management (list/delete), and security validation against path traversal attacks. Practical workflows and best practices are included to help maintain consistent Python environments across development and production.
+
+**Updated** The backup manager has been reorganized into the operations layer at `core/operations/backupManager.js` as part of the application's modular architecture improvement.
 
 ## Project Structure
-The backup and recovery functionality is implemented primarily in a dedicated manager module and supported by utilities for process execution, configuration, logging, and security. IPC handlers in the main process expose these capabilities to the UI.
+The backup and recovery functionality is implemented primarily in a dedicated manager module within the operations layer, supported by utilities for process execution, configuration, logging, and security. IPC handlers in the main process expose these capabilities to the UI.
 
 ```mermaid
 graph TB
-subgraph "Core Operations"
+subgraph "Operations Layer"
 BM["backupManager.js"]
+PM["pipManager.js"]
 end
 subgraph "Utilities"
 PR["processRunner.js"]
@@ -45,36 +56,40 @@ subgraph "Main Process"
 MAIN["main.js"]
 end
 MAIN --> BM
+MAIN --> PM
 BM --> PR
 BM --> CFG
 BM --> LOG
-MAIN --> SEC
+PM --> BM
 ```
 
 **Diagram sources**
 - [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
+- [pipManager.js:20-27](file://core/operations/pipManager.js#L20-L27)
 - [processRunner.js:1-366](file://utils/processRunner.js#L1-L366)
 - [security.js:1-43](file://utils/security.js#L1-L43)
 - [configManager.js:1-194](file://core/config/configManager.js#L1-L194)
 - [logManager.js:1-176](file://core/system/logManager.js#L1-L176)
-- [main.js:355-368](file://main.js#L355-L368)
+- [main.js:17-31](file://main.js#L17-L31)
 
 **Section sources**
 - [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
-- [main.js:355-368](file://main.js#L355-L368)
+- [main.js:17-31](file://main.js#L17-L31)
+- [pipManager.js:20-27](file://core/operations/pipManager.js#L20-L27)
 
 ## Core Components
-- Backup Manager: Creates backups via pip freeze, lists backups, restores from backups with force-reinstall, deletes backups, and validates backup IDs securely.
-- Process Runner: Executes pip commands with timeouts, progress callbacks, and cancellation support.
-- Configuration Manager: Provides storage paths where backups and logs are persisted.
-- Log Manager: Records backup-related actions and errors.
-- Security Utilities: Provide path safety checks used elsewhere in the application; backup ID validation is handled within the backup manager.
+- **Backup Manager**: Located in `core/operations/backupManager.js`, creates backups via pip freeze, lists backups, restores from backups with force-reinstall, deletes backups, and validates backup IDs securely.
+- **Process Runner**: Executes pip commands with timeouts, progress callbacks, and cancellation support.
+- **Configuration Manager**: Provides storage paths where backups and logs are persisted.
+- **Log Manager**: Records backup-related actions and errors.
+- **Security Utilities**: Provide path safety checks used elsewhere in the application; backup ID validation is handled within the backup manager.
 
 Key responsibilities:
 - Automated backup creation using pip freeze output.
 - Deterministic restore using requirements-style files with force-reinstall flags.
 - Safe backup ID validation to prevent path traversal.
 - Centralized storage under a configured storage directory.
+- Integration with pip manager for rollback operations.
 
 **Section sources**
 - [backupManager.js:25-113](file://core/operations/backupManager.js#L25-L113)
@@ -86,13 +101,14 @@ Key responsibilities:
 - [logManager.js:115-134](file://core/system/logManager.js#L115-L134)
 
 ## Architecture Overview
-The backup and recovery flow integrates the UI (via IPC), the main process, and core modules. The main process exposes IPC handlers that delegate to the backup manager, which uses the process runner to execute pip commands and writes results to the configured storage path.
+The backup and recovery flow integrates the UI (via IPC), the main process, and core modules within the operations layer. The main process exposes IPC handlers that delegate to the backup manager, which uses the process runner to execute pip commands and writes results to the configured storage path.
 
 ```mermaid
 sequenceDiagram
 participant UI as "Renderer UI"
 participant Main as "Electron Main"
-participant BM as "Backup Manager"
+participant BM as "Backup Manager<br/>(core/operations)"
+participant PM as "Pip Manager<br/>(core/operations)"
 participant PR as "Process Runner"
 participant FS as "Filesystem"
 UI->>Main : "IPC backup : create"
@@ -113,6 +129,7 @@ BM->>PR : runPip(["install", "-r", filePath, "--force-reinstall", "--no-deps", "
 PR-->>BM : progress events
 BM-->>Main : pip result
 Main-->>UI : progress + completion
+Note over PM,BM : Pip Manager also uses Backup Manager<br/>for rollback operations
 ```
 
 **Diagram sources**
@@ -120,6 +137,7 @@ Main-->>UI : progress + completion
 - [backupManager.js:89-113](file://core/operations/backupManager.js#L89-L113)
 - [backupManager.js:122-142](file://core/operations/backupManager.js#L122-L142)
 - [backupManager.js:156-170](file://core/operations/backupManager.js#L156-L170)
+- [pipManager.js:534-572](file://core/operations/pipManager.js#L534-L572)
 - [processRunner.js:340-342](file://utils/processRunner.js#L340-L342)
 
 ## Detailed Component Analysis
@@ -306,19 +324,21 @@ Main-->>UI : boolean
 - [main.js:355-368](file://main.js#L355-L368)
 
 ## Dependency Analysis
-The backup system depends on several modules:
+The backup system depends on several modules within the operations layer:
 
 ```mermaid
 graph LR
-BM["backupManager.js"] --> PR["processRunner.js"]
+BM["backupManager.js<br/>(core/operations)"] --> PR["processRunner.js"]
 BM --> CFG["configManager.js"]
 BM --> LOG["logManager.js"]
+PM["pipManager.js<br/>(core/operations)"] --> BM
 MAIN["main.js"] --> BM
 MAIN --> SEC["security.js"]
 ```
 
 - Direct dependencies:
   - backupManager.js imports configManager, logManager, and processRunner.
+  - pipManager.js imports backupManager for rollback operations.
   - main.js wires IPC handlers to backupManager.
 - Indirect dependencies:
   - processRunner handles child processes, timeouts, and pip availability checks.
@@ -333,10 +353,12 @@ External integration points:
 
 **Diagram sources**
 - [backupManager.js:19-24](file://core/operations/backupManager.js#L19-L24)
+- [pipManager.js:20-27](file://core/operations/pipManager.js#L20-L27)
 - [main.js:17-31](file://main.js#L17-L31)
 
 **Section sources**
 - [backupManager.js:19-24](file://core/operations/backupManager.js#L19-L24)
+- [pipManager.js:20-27](file://core/operations/pipManager.js#L20-L27)
 - [main.js:17-31](file://main.js#L17-L31)
 
 ## Performance Considerations
@@ -344,8 +366,6 @@ External integration points:
 - Progress callbacks stream output to the UI, enabling responsive interfaces during long-running operations.
 - Logging uses debounced writes to reduce disk thrash while ensuring data durability on shutdown.
 - Backup listing reads only filenames and stats, minimizing overhead.
-
-[No sources needed since this section provides general guidance]
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -369,12 +389,12 @@ Operational tips:
 - [backupManager.js:89-113](file://core/operations/backupManager.js#L89-L113)
 - [backupManager.js:156-170](file://core/operations/backupManager.js#L156-L170)
 - [backupManager.js:62-78](file://core/operations/backupManager.js#L62-L78)
-- [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)
+- [processRunner.js:233-278](file://utils/processRunner.js#L233-278)
 
 ## Conclusion
-PyLibMaster’s backup and recovery system provides a robust, secure, and user-friendly way to snapshot and restore Python environments. By leveraging pip freeze for deterministic snapshots and force-reinstall for reliable restoration, it ensures consistency across development and production. Strong input validation protects against path traversal, while centralized storage and logging simplify maintenance and troubleshooting.
+PyLibMaster's backup and recovery system provides a robust, secure, and user-friendly way to snapshot and restore Python environments. By leveraging pip freeze for deterministic snapshots and force-reinstall for reliable restoration, it ensures consistency across development and production. Strong input validation protects against path traversal, while centralized storage and logging simplify maintenance and troubleshooting.
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** The system now benefits from improved module organization with the backup manager relocated to the operations layer, providing better separation of concerns and easier maintenance.
 
 ## Appendices
 
@@ -394,5 +414,16 @@ Best practices:
 - Maintain one backup per environment per release cycle.
 - Store backups in a shared or versioned location for team consistency.
 - Validate restored environments by checking package versions post-restore.
+
+### Module Organization Changes
+**Updated** The backup manager has been reorganized as part of the operations layer restructuring:
+
+- **Previous Location**: `core/backupManager.js`
+- **New Location**: `core/operations/backupManager.js`
+- **Import Updates**: 
+  - `main.js`: Updated to `require('./core/operations/backupManager')`
+  - `pipManager.js`: Uses relative import `require('./backupManager')` (works due to same directory)
+
+This reorganization improves code modularity and makes it easier to manage related operational functions together.
 
 [No sources needed since this section provides general guidance]

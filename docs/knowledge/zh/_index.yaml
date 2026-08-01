@@ -3,11 +3,11 @@ schema_version: 1
 locale: zh-CN
 branch: main
 nodes_managed: true
-exported_at: "2026-08-01T09:28:16Z"
+exported_at: "2026-08-01T15:55:01Z"
 modules:
     "":
-        dir_name: PyLibMaster Electron 应用根工程
-        title: PyLibMaster Electron 应用根工程
+        dir_name: PyLibMaster Electron 桌面应用根工程
+        title: PyLibMaster Electron 桌面应用根工程
         scope:
             - .gitignore
             - package.json
@@ -23,8 +23,8 @@ modules:
         depends_on: []
         related_to: []
     core:
-        dir_name: 核心业务与系统管理模块
-        title: 核心业务与系统管理模块
+        dir_name: PyLibMaster 核心层（配置、操作与系统管理）
+        title: PyLibMaster 核心层（配置、操作与系统管理）
         scope:
             - core/
         source_files: []

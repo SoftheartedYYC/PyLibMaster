@@ -1,1 +1,1 @@
-`npm start` launches the Electron app via `electron .`; `npm run build` / `npm run build:win` / `npm run dist` produce an NSIS installer targeting x64 Windows; `npm test` runs Node's built-in test runner against `tests/**/*.test.js` using `./tests/bootstrap.js`.
+`npm start` launches Electron (`electron .`); `npm run build` / `npm run build:win` / `npm run dist` produce the Windows installer via electron-builder; `npm test` runs the Node test runner against `tests/**/*.test.js` with `./tests/bootstrap.js`.

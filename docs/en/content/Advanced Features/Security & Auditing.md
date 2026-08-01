@@ -12,6 +12,15 @@
 - [ci.yml](file://.github/workflows/ci.yml)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for the new audit manager (auditManager.js)
+- Updated vulnerability scanning capabilities with pip-audit integration
+- Enhanced dependency conflict analysis documentation
+- Expanded environment health monitoring features
+- Added detailed IPC integration patterns for audit operations
+- Updated troubleshooting guide with audit-specific issues
+
 ## Table of Contents
 1. Introduction
 2. Project Structure
@@ -25,13 +34,13 @@
 10. Appendices
 
 ## Introduction
-This document explains PyLibMaster’s security auditing and vulnerability scanning capabilities, including CVE detection via pip-audit, dependency conflict analysis, and environment health monitoring. It covers the end-to-end audit workflow, output formats, integration with external security databases, best practices, recommended scanning schedules, remediation guidance, example reports, metrics interpretation, and CI/CD integration patterns for automated security checks.
+This document explains PyLibMaster's comprehensive security auditing and vulnerability scanning capabilities, including CVE detection via pip-audit integration, dependency conflict analysis, and environment health monitoring. The system provides automated security scanning with intelligent caching, structured reporting, and CI/CD pipeline integration for proactive vulnerability management.
 
 ## Project Structure
 Security-related functionality is implemented across core modules and utilities:
-- Audit orchestration and parsing live in a dedicated manager module.
+- Audit orchestration and parsing live in a dedicated audit manager module.
 - Dependency conflict analysis and health checks are provided by the package manager module.
-- Process execution, timeouts, and cancellation are handled by a process runner utility.
+- Process execution, timeouts, and cancellation are handled by a robust process runner utility.
 - Path safety validation is provided by a security utility.
 - Logging persists audit outcomes and operational events.
 - The main process exposes IPC handlers to trigger audits from the UI or automation layers.
@@ -79,12 +88,12 @@ M --> S
 - [logManager.js](file://core/system/logManager.js)
 
 ## Core Components
-- Vulnerability scanner (CVE detection): Uses pip-audit to scan installed packages against the PyPI Advisory Database, parses JSON results, infers severity, and returns structured findings with fix recommendations.
-- Dependency conflict analyzer: Runs pip check to detect broken requirements and version conflicts, returning parsed conflict details.
-- Environment health monitor: Aggregates multiple diagnostics (package listing, dependency checks, metadata integrity, site-packages accessibility) into a scored report.
-- Process execution layer: Provides robust subprocess management with timeouts, cancellation, ANSI stripping, and UTF-8 encoding.
-- Path security validator: Ensures file paths are within allowed directories to prevent path traversal attacks.
-- Logging subsystem: Persists audit outcomes and operational logs with capacity control and search/filtering.
+- **Vulnerability scanner (CVE detection)**: Uses pip-audit to scan installed packages against the PyPI Advisory Database, parses JSON results, infers severity levels, and returns structured findings with fix recommendations.
+- **Dependency conflict analyzer**: Runs pip check to detect broken requirements and version conflicts, returning parsed conflict details.
+- **Environment health monitor**: Aggregates multiple diagnostics (package listing, dependency checks, metadata integrity, site-packages accessibility) into a scored report.
+- **Process execution layer**: Provides robust subprocess management with timeouts, cancellation, ANSI stripping, and UTF-8 encoding.
+- **Path security validator**: Ensures file paths are within allowed directories to prevent path traversal attacks.
+- **Logging subsystem**: Persists audit outcomes and operational logs with capacity control and search/filtering.
 
 **Section sources**
 - [auditManager.js](file://core/operations/auditManager.js)
@@ -124,11 +133,13 @@ Main-->>UI : progress events + result
 ## Detailed Component Analysis
 
 ### Vulnerability Scanner (CVE Detection)
-- Ensures pip-audit is available; installs it if missing.
-- Executes pip-audit in JSON mode with progress spinner disabled.
-- Parses both new and legacy JSON formats, normalizes fields, and infers severity when not provided.
-- Caches results for a short TTL to avoid repeated scans.
-- Logs outcomes and provides structured summaries.
+The audit manager provides comprehensive vulnerability scanning capabilities:
+
+- **Automatic pip-audit installation**: Ensures pip-audit is available; installs it if missing with progress feedback
+- **JSON-based scanning**: Executes pip-audit in JSON mode with progress spinner disabled for optimal performance
+- **Intelligent result parsing**: Handles both new and legacy JSON formats, normalizes fields, and infers severity when not provided
+- **Caching mechanism**: Caches results for 10 minutes to avoid repeated scans during development sessions
+- **Structured reporting**: Returns comprehensive vulnerability data with fix recommendations and NVD links
 
 ```mermaid
 flowchart TD
@@ -152,9 +163,12 @@ Log --> Return(["Return structured result"])
 - [auditManager.js](file://core/operations/auditManager.js)
 
 ### Dependency Conflict Analysis
-- Invokes pip check to identify broken requirements and version mismatches.
-- Parses standard messages to extract conflicting packages, required versions, and installed versions.
-- Returns a structured object indicating overall status and detailed conflicts.
+Enhanced dependency conflict detection capabilities:
+
+- **Comprehensive checking**: Invokes pip check to identify broken requirements and version mismatches
+- **Detailed parsing**: Parses standard messages to extract conflicting packages, required versions, and installed versions
+- **Structured reporting**: Returns a structured object indicating overall status and detailed conflicts
+- **Integration with health checks**: Works seamlessly with environment health monitoring
 
 ```mermaid
 flowchart TD
@@ -176,12 +190,13 @@ Ok --> End
 - [pipManager.js](file://core/operations/pipManager.js)
 
 ### Environment Health Monitoring
-- Aggregates diagnostics:
-  - Package count via list command.
-  - Dependency conflicts via pip check.
-  - Metadata integrity sampling via show on a subset of packages.
-  - site-packages accessibility check.
-- Computes a score (0–100) and lists issues with levels (error/warning).
+Comprehensive environment diagnostics:
+
+- **Package inventory**: Lists all installed packages with metadata
+- **Dependency validation**: Checks for broken dependencies using pip check
+- **Metadata integrity**: Samples package metadata to verify installation integrity
+- **Site-packages verification**: Validates site-packages directory accessibility
+- **Scoring system**: Computes a health score (0–100) with categorized issues
 
 ```mermaid
 flowchart TD
@@ -202,10 +217,13 @@ Score --> End(["Return health report"])
 - [pipManager.js](file://core/operations/pipManager.js)
 
 ### Process Execution Layer
-- Spawns child processes with UTF-8 encoding and ANSI stripping.
-- Supports timeouts with graceful SIGTERM followed by SIGKILL.
-- Tracks active processes for cancellation by operationId.
-- Provides helpers for pip and Python commands.
+Robust subprocess management for security operations:
+
+- **UTF-8 encoding**: Forces UTF-8 encoding for Python processes to prevent character encoding issues
+- **ANSI stripping**: Automatically removes ANSI color codes from terminal output
+- **Timeout handling**: Implements graceful timeout with SIGTERM followed by SIGKILL after delay
+- **Process tracking**: Maintains active process registry for cancellation support
+- **Operation grouping**: Supports operation IDs for batch process cancellation
 
 ```mermaid
 classDiagram
@@ -227,8 +245,12 @@ class ProcessRunner {
 - [processRunner.js](file://utils/processRunner.js)
 
 ### Path Security Validator
-- Validates that target paths reside within allowed directories.
-- Prevents path traversal by resolving absolute paths and enforcing boundary checks.
+Security-focused path validation:
+
+- **Absolute path resolution**: Converts relative paths to absolute paths to prevent traversal attacks
+- **Directory boundary enforcement**: Ensures target paths remain within allowed directories
+- **Boundary checking**: Prevents path traversal using "../" sequences
+- **Multiple directory support**: Validates against multiple allowed directories simultaneously
 
 ```mermaid
 flowchart TD
@@ -245,8 +267,12 @@ Compare --> |No| Deny["Deny access"]
 - [security.js](file://utils/security.js)
 
 ### IPC Integration and Entry Points
-- The main process exposes an IPC handler for running audits and retrieving cached results.
-- Progress events are forwarded to the renderer during long-running operations.
+Seamless integration with the main process:
+
+- **Audit execution handler**: `audit:run` IPC handler triggers vulnerability scans
+- **Cached result retrieval**: `audit:cached` handler provides access to recent scan results
+- **Progress streaming**: Real-time progress updates via pip:progress events
+- **Error handling**: Comprehensive error propagation with meaningful messages
 
 ```mermaid
 sequenceDiagram
@@ -268,11 +294,11 @@ Main-->>UI : pip : progress events + final result
 
 ## Dependency Analysis
 Key dependencies and relationships:
-- auditManager depends on processRunner for executing pip-audit and logManager for persistence.
-- pipManager depends on processRunner for pip commands and logManager for logging.
-- main wires IPC handlers to these modules.
-- packaging metadata defines application identity and build targets.
-- CI workflow ensures tests and builds pass before artifacts are produced.
+- auditManager depends on processRunner for executing pip-audit and logManager for persistence
+- pipManager depends on processRunner for pip commands and logManager for logging
+- main wires IPC handlers to these modules
+- packaging metadata defines application identity and build targets
+- CI workflow ensures tests and builds pass before artifacts are produced
 
 ```mermaid
 graph LR
@@ -308,21 +334,29 @@ CI[".github/workflows/ci.yml"] --> Main
 - [ci.yml](file://.github/workflows/ci.yml)
 
 ## Performance Considerations
-- Audit caching: Results are cached for a short TTL to reduce repeated scans.
-- Process timeouts: Long-running operations have explicit timeouts to prevent hangs.
-- ANSI stripping and UTF-8 encoding: Improves performance and correctness of output processing.
-- Limited scanning scope: Dependency graph building limits scanned packages to avoid timeouts.
-- Disk usage estimation uses fast heuristics and caches directory mappings.
+Optimization strategies for security scanning:
 
-[No sources needed since this section provides general guidance]
+- **Audit caching**: Results are cached for 10 minutes to reduce repeated scans during development
+- **Process timeouts**: Long-running operations have explicit timeouts to prevent hangs
+- **ANSI stripping and UTF-8 encoding**: Improves performance and correctness of output processing
+- **Limited scanning scope**: Dependency graph building limits scanned packages to avoid timeouts
+- **Disk usage estimation**: Uses fast heuristics and caches directory mappings
+- **Memory management**: Efficient data structures for large vulnerability datasets
 
 ## Troubleshooting Guide
 Common issues and resolutions:
-- pip-audit installation failure: Ensure network access and permissions; install manually if automatic installation fails.
-- No Python environment selected: Select a valid environment before running audits or health checks.
-- Timeouts during scans: Increase timeout values or reduce environment size; verify network stability.
-- Permission errors on paths: Use allowed directories only; validate paths with the security utility.
-- Corrupted metadata: Reinstall affected packages after identifying them via health checks.
+
+### Audit-Specific Issues
+- **pip-audit installation failure**: Ensure network access and permissions; install manually if automatic installation fails
+- **No Python environment selected**: Select a valid environment before running audits or health checks
+- **Scan timeouts**: Increase timeout values or reduce environment size; verify network stability
+- **Permission errors on paths**: Use allowed directories only; validate paths with the security utility
+- **Corrupted metadata**: Reinstall affected packages after identifying them via health checks
+
+### General Security Issues
+- **Path traversal attempts**: Verify that user-supplied paths are validated through security utilities
+- **Process hanging**: Check for unresponsive subprocesses and use cancellation mechanisms
+- **Memory leaks**: Monitor memory usage during large scans and implement proper cleanup
 
 **Section sources**
 - [auditManager.js](file://core/operations/auditManager.js)
@@ -332,19 +366,17 @@ Common issues and resolutions:
 - [logManager.js](file://core/system/logManager.js)
 
 ## Conclusion
-PyLibMaster provides a robust security auditing pipeline that leverages pip-audit for CVE detection, pip check for dependency conflicts, and comprehensive health diagnostics. With secure process execution, path validation, and persistent logging, it supports reliable, repeatable security checks suitable for local development and CI/CD pipelines.
-
-[No sources needed since this section summarizes without analyzing specific files]
+PyLibMaster provides a robust security auditing pipeline that leverages pip-audit for CVE detection, pip check for dependency conflicts, and comprehensive health diagnostics. With secure process execution, path validation, and persistent logging, it supports reliable, repeatable security checks suitable for local development and CI/CD pipelines. The new audit manager enhances the platform's security posture with automated vulnerability scanning and intelligent remediation guidance.
 
 ## Appendices
 
 ### Audit Workflow Summary
-- Trigger audit via IPC handler.
-- Ensure pip-audit availability.
-- Execute pip-audit in JSON mode.
-- Parse and normalize results.
-- Cache and log outcomes.
-- Return structured report to caller.
+- Trigger audit via IPC handler
+- Ensure pip-audit availability with automatic installation
+- Execute pip-audit in JSON mode with progress feedback
+- Parse and normalize results with severity inference
+- Cache and log outcomes for future reference
+- Return structured report to caller with actionable insights
 
 **Section sources**
 - [main.js](file://main.js)
@@ -353,76 +385,89 @@ PyLibMaster provides a robust security auditing pipeline that leverages pip-audi
 - [logManager.js](file://core/system/logManager.js)
 
 ### Vulnerability Reporting Format
-- Structured result includes:
-  - vulnerabilities: array of objects with id, package, version, severity, summary, fixVersion, url, aliases.
-  - summary: counts for totalVulns, affectedPackages, critical/high/medium/low, fixable.
-  - scanTime: ISO timestamp.
-- Severity inference falls back to description-based heuristics when not provided.
+Structured vulnerability data includes:
+- **vulnerabilities**: Array of objects with id, package, version, severity, summary, fixVersion, url, aliases
+- **summary**: Counts for totalVulns, affectedPackages, critical/high/medium/low, fixable
+- **scanTime**: ISO timestamp for audit execution
+- **Severity inference**: Falls back to description-based heuristics when not provided
 
 **Section sources**
 - [auditManager.js](file://core/operations/auditManager.js)
 
 ### Dependency Conflict Report Format
-- Object with:
-  - ok: boolean indicating no conflicts.
-  - conflicts: array of objects with package, version, requires, installed, message.
-  - message: raw output or summary.
+Conflict detection results include:
+- **ok**: Boolean indicating no conflicts detected
+- **conflicts**: Array of objects with package, version, requires, installed, message
+- **message**: Raw output or summary of conflict details
 
 **Section sources**
 - [pipManager.js](file://core/operations/pipManager.js)
 
 ### Health Report Metrics
-- Fields include envName, pythonVersion, totalPackages, issues, brokenPackages, missingMetadata, conflicts, score (0–100).
-- Issues are tagged with level (error/warning) and descriptive messages.
+Comprehensive health assessment includes:
+- **envName**: Target environment identifier
+- **pythonVersion**: Python interpreter version
+- **totalPackages**: Count of installed packages
+- **issues**: Array of problems with level (error/warning) and descriptive messages
+- **brokenPackages**: Packages with dependency issues
+- **missingMetadata**: Packages with incomplete metadata
+- **conflicts**: Version conflict details
+- **score**: Overall health score (0–100)
 
 **Section sources**
 - [pipManager.js](file://core/operations/pipManager.js)
 
 ### External Security Databases Integration
-- Data source: PyPI Advisory Database via pip-audit.
-- Links: NVD detail URLs constructed from CVE IDs where applicable.
+Data sources and references:
+- **Primary source**: PyPI Advisory Database via pip-audit
+- **Secondary sources**: NVD detail URLs constructed from CVE IDs where applicable
+- **Alias mapping**: Support for multiple vulnerability identifiers (CVE, GHSA, etc.)
 
 **Section sources**
 - [auditManager.js](file://core/operations/auditManager.js)
 
 ### Security Best Practices
-- Keep pip-audit updated to benefit from latest advisories.
-- Regularly run audits in isolated environments per project.
-- Enforce minimum severity thresholds in CI to block vulnerable merges.
-- Use path validation utilities for any user-supplied file paths.
-- Maintain backups before major updates or rollbacks.
-
-[No sources needed since this section provides general guidance]
+Recommended security measures:
+- Keep pip-audit updated to benefit from latest advisories
+- Regularly run audits in isolated environments per project
+- Enforce minimum severity thresholds in CI to block vulnerable merges
+- Use path validation utilities for any user-supplied file paths
+- Maintain backups before major updates or rollbacks
+- Implement proper error handling for security-sensitive operations
 
 ### Recommended Scanning Schedules
-- Pre-commit: quick dependency check and lightweight audit.
-- Nightly: full CVE scan and health check.
-- Before releases: comprehensive audit and conflict resolution.
-- On-demand: triggered by manual actions or dependency changes.
-
-[No sources needed since this section provides general guidance]
+Automated security scanning strategy:
+- **Pre-commit**: Quick dependency check and lightweight audit
+- **Nightly**: Full CVE scan and comprehensive health check
+- **Before releases**: Comprehensive audit and conflict resolution
+- **On-demand**: Triggered by manual actions or dependency changes
+- **Post-deployment**: Validation scans in production-like environments
 
 ### Remediation Guidance
-- Prioritize critical and high severity issues first.
-- Upgrade to fixed versions indicated in vulnerability records.
-- If upgrades are blocked by conflicts, resolve dependency constraints before upgrading.
-- Validate fixes with subsequent health checks and audits.
-
-[No sources needed since this section provides general guidance]
+Prioritized vulnerability response:
+- **Critical issues**: Immediate attention with hotfix deployment
+- **High severity**: Address within current sprint cycle
+- **Medium severity**: Plan for next release iteration
+- **Low severity**: Include in regular maintenance cycles
+- **Upgrade strategy**: Prioritize upgrades to fixed versions indicated in vulnerability records
+- **Conflict resolution**: Resolve dependency constraints before upgrading vulnerable packages
+- **Validation**: Validate fixes with subsequent health checks and audits
 
 ### Example Audit Report Interpretation
-- Total vulnerabilities: indicates overall risk exposure.
-- Affected packages: highlights scope of impact.
-- Severity distribution: guides triage effort.
-- Fixable count: shows actionable items with known fixes.
-- Scan time: helps assess performance characteristics.
-
-[No sources needed since this section provides general guidance]
+Understanding audit results:
+- **Total vulnerabilities**: Indicates overall risk exposure level
+- **Affected packages**: Highlights scope of impact across the dependency tree
+- **Severity distribution**: Guides triage effort and resource allocation
+- **Fixable count**: Shows actionable items with known fixes available
+- **Scan time**: Helps assess performance characteristics and optimization opportunities
 
 ### CI/CD Integration Patterns
-- Add a job to install Node dependencies, then execute tests and build steps.
-- Introduce a security job that runs pip-audit against the environment and fails on non-zero exit codes or threshold breaches.
-- Upload artifacts and store logs for traceability.
+Automated security pipeline implementation:
+- **Test job**: Install Node dependencies, execute tests and build steps
+- **Security job**: Run pip-audit against the environment and fail on non-zero exit codes or threshold breaches
+- **Artifact upload**: Store audit reports and logs for traceability
+- **Notification**: Alert teams of critical vulnerabilities found during scans
+- **Blocking rules**: Prevent merges with critical or high severity vulnerabilities
 
 **Section sources**
 - [ci.yml](file://.github/workflows/ci.yml)

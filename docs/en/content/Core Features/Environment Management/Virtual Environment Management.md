@@ -14,6 +14,14 @@
 - [app.js](file://renderer/js/app.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Added comprehensive virtual environment lifecycle management with creation, listing, deletion, and detailed information retrieval
+- Enhanced template-based environment setup with built-in templates for common development stacks
+- Integrated full GUI interface for virtual environment management including creation forms and environment lists
+- Added snapshot and backup capabilities for environment versioning and rollback
+- Implemented environment comparison tools for dependency analysis across multiple environments
+
 ## Table of Contents
 1. Introduction
 2. Project Structure
@@ -27,7 +35,7 @@
 10. Appendices
 
 ## Introduction
-This document explains how to create and manage Python virtual environments through PyLibMaster’s GUI. It covers the venv creation workflow, template-based setup options, custom configuration parameters, integration with existing Python environments, dependency isolation, environment comparison tools, export/import functionality, requirements.txt generation, and backup capabilities. Practical examples include creating development vs production environments, managing multiple project environments, and sharing configurations across team members.
+This document explains how to create and manage Python virtual environments through PyLibMaster's GUI. It covers the venv creation workflow, template-based setup options, custom configuration parameters, integration with existing Python environments, dependency isolation, environment comparison tools, export/import functionality, requirements.txt generation, and backup capabilities. Practical examples include creating development vs production environments, managing multiple project environments, and sharing configurations across team members.
 
 ## Project Structure
 PyLibMaster organizes virtual environment management across backend modules (Node.js) and a web-based GUI:
@@ -89,12 +97,12 @@ EnvMgr --> ProcRunner
 - [processRunner.js](file://utils/processRunner.js)
 
 ## Core Components
-- Virtual Environment Manager: Creates, lists, deletes, and inspects venvs; validates names and paths; cleans up on failure.
-- Template Manager: Provides preset templates (Web, Data, ML, etc.), creates venvs from templates, installs packages, and manages snapshots for time-travel rollback.
-- Environment Manager: Detects installed Python environments (system, Conda, Windows Store), resolves versions, persists current selection.
-- Pip Manager: Executes install/uninstall/update with parallelism, retries, mirror routing, automatic rollback via backups, and safe spec building.
-- Backup Manager: Creates freeze-based backups and restores them using force-reinstall without dependencies.
-- Process Runner: Spawns subprocesses, handles timeouts, cancellation, ANSI cleanup, and ensures pip availability.
+- **Virtual Environment Manager**: Creates, lists, deletes, and inspects venvs; validates names and paths; cleans up on failure.
+- **Template Manager**: Provides preset templates (Web, Data, ML, etc.), creates venvs from templates, installs packages, and manages snapshots for time-travel rollback.
+- **Environment Manager**: Detects installed Python environments (system, Conda, Windows Store), resolves versions, persists current selection.
+- **Pip Manager**: Executes install/uninstall/update with parallelism, retries, mirror routing, automatic rollback via backups, and safe spec building.
+- **Backup Manager**: Creates freeze-based backups and restores them using force-reinstall without dependencies.
+- **Process Runner**: Spawns subprocesses, handles timeouts, cancellation, ANSI cleanup, and ensures pip availability.
 
 **Section sources**
 - [venvManager.js](file://core/operations/venvManager.js)
@@ -140,10 +148,10 @@ Tpl-->>UI : {success, venvName, packageCount}
 ## Detailed Component Analysis
 
 ### Virtual Environment Creation and Lifecycle
-- Create venv: Validates name and base Python, constructs arguments (with/without pip, inherit system site-packages), executes python -m venv, captures version, logs outcome, and cleans up on failure.
-- List venvs: Scans storage directory, verifies validity (python executable and pyvenv.cfg), collects Python/pip versions and package counts.
-- Delete venv: Enforces path safety checks within storage root, removes directory recursively, logs action.
-- Get venv info: Returns Python/pip versions and base Python path from pyvenv.cfg.
+- **Create venv**: Validates name and base Python, constructs arguments (with/without pip, inherit system site-packages), executes python -m venv, captures version, logs outcome, and cleans up on failure.
+- **List venvs**: Scans storage directory, verifies validity (python executable and pyvenv.cfg), collects Python/pip versions and package counts.
+- **Delete venv**: Enforces path safety checks within storage root, removes directory recursively, logs action.
+- **Get venv info**: Returns Python/pip versions and base Python path from pyvenv.cfg.
 
 ```mermaid
 flowchart TD
@@ -165,9 +173,9 @@ Probe --> Return["Return venv info"]
 - [venvManager.js](file://core/operations/venvManager.js)
 
 ### Template-Based Setup Options
-- Built-in templates cover common stacks (Flask, Django, data analysis, machine learning, crawler, automation).
-- From template flow: create venv, locate it, then install all packages defined by the template using pip manager with parallelism and retries.
-- Custom templates can be added and persisted via config.
+- **Built-in templates** cover common stacks (Flask, Django, data analysis, machine learning, crawler, automation).
+- **From template flow**: create venv, locate it, then install all packages defined by the template using pip manager with parallelism and retries.
+- **Custom templates** can be added and persisted via config.
 
 ```mermaid
 classDiagram
@@ -204,9 +212,9 @@ TemplateManager --> PipManager : "installs packages"
 - [templateManager.js](file://core/operations/templateManager.js)
 
 ### Integration with Existing Python Environments
-- Auto-detects Python installations across common paths and PATH entries, including Conda variants.
-- Resolves Python and pip versions, filters out environments without pip, and persists selected environment.
-- GUI allows switching active environment and repairing pip if needed.
+- **Auto-detects** Python installations across common paths and PATH entries, including Conda variants.
+- **Resolves** Python and pip versions, filters out environments without pip, and persists selected environment.
+- **GUI allows** switching active environment and repairing pip if needed.
 
 ```mermaid
 sequenceDiagram
@@ -233,9 +241,9 @@ Env-->>UI : updated current env
 - [pages.js](file://renderer/js/pages.js)
 
 ### Dependency Isolation and Package Management
-- venv isolates dependencies per environment; GUI supports selecting base Python and inheriting system site-packages when desired.
-- Pip manager enforces safe package specs, parallel installs, multi-mirror retries, and automatic rollback via backups.
-- Uninstall supports optional backup and rollback; update supports parallel updates and rollback.
+- **venv isolates** dependencies per environment; GUI supports selecting base Python and inheriting system site-packages when desired.
+- **Pip manager** enforces safe package specs, parallel installs, multi-mirror retries, and automatic rollback via backups.
+- **Uninstall supports** optional backup and rollback; update supports parallel updates and rollback.
 
 ```mermaid
 flowchart TD
@@ -265,8 +273,8 @@ L --> M
 - [backupManager.js](file://core/operations/backupManager.js)
 
 ### Environment Comparison Tools
-- GUI provides two dropdowns populated with detected environments.
-- Compares installed packages between two environments, showing only-in-A, only-in-B, and differing versions.
+- **GUI provides** two dropdowns populated with detected environments.
+- **Compares** installed packages between two environments, showing only-in-A, only-in-B, and differing versions.
 
 ```mermaid
 sequenceDiagram
@@ -284,8 +292,8 @@ UI->>UI : Render chips and summary
 - [pages.js](file://renderer/js/pages.js)
 
 ### Export/Import and Requirements.txt Generation
-- Export: Select destination directory, generate requirements.txt for the current environment.
-- Import: Browse to a requirements.txt file and install packages into the current environment.
+- **Export**: Select destination directory, generate requirements.txt for the current environment.
+- **Import**: Browse to a requirements.txt file and install packages into the current environment.
 
 ```mermaid
 sequenceDiagram
@@ -317,8 +325,8 @@ Ops-->>UI : refreshAll() + success toast
 - [pipManager.js](file://core/operations/pipManager.js)
 
 ### Snapshot and Backup Capabilities
-- Snapshots: Capture full environment state (pip freeze) with labels and timestamps; restore by writing temporary requirements and installing quietly.
-- Backups: Freeze-based backups used for rollback during risky operations; support listing and deletion.
+- **Snapshots**: Capture full environment state (pip freeze) with labels and timestamps; restore by writing temporary requirements and installing quietly.
+- **Backups**: Freeze-based backups used for rollback during risky operations; support listing and deletion.
 
 ```mermaid
 flowchart TD
@@ -342,9 +350,9 @@ Cleanup --> REnd["Done"]
 - [backupManager.js](file://core/operations/backupManager.js)
 
 ### GUI Workflows for Virtual Environments
-- Environment page: Create venv form (name, base Python, include pip, inherit system site-packages), list and use/delete venvs, export/import, compare.
-- Templates page: Choose preset or custom template, enter venv name and base Python, create and install, manage snapshots.
-- Operations page: Global refresh integrates env and venv lists, renders options for comparisons and base Python selectors.
+- **Environment page**: Create venv form (name, base Python, include pip, inherit system site-packages), list and use/delete venvs, export/import, compare.
+- **Templates page**: Choose preset or custom template, enter venv name and base Python, create and install, manage snapshots.
+- **Operations page**: Global refresh integrates env and venv lists, renders options for comparisons and base Python selectors.
 
 ```mermaid
 sequenceDiagram
@@ -373,11 +381,11 @@ Pages->>Pages : show success toast
 - [pages.js](file://renderer/js/pages.js)
 
 ## Dependency Analysis
-- GUI depends on pages.js for interactions, which calls backend managers.
-- venvManager depends on processRunner for command execution and configManager for storage paths.
-- templateManager composes venvManager and pipManager to provision environments and install packages.
-- pipManager relies on envManager for current environment context and backupManager for rollback.
-- All managers use processRunner for robust subprocess handling, timeout/cancellation, and pip auto-installation.
+- **GUI depends** on pages.js for interactions, which calls backend managers.
+- **venvManager depends** on processRunner for command execution and configManager for storage paths.
+- **templateManager composes** venvManager and pipManager to provision environments and install packages.
+- **pipManager relies** on envManager for current environment context and backupManager for rollback.
+- **All managers use** processRunner for robust subprocess handling, timeout/cancellation, and pip auto-installation.
 
 ```mermaid
 graph LR
@@ -413,21 +421,19 @@ EnvMgr --> ProcRunner
 - [processRunner.js](file://utils/processRunner.js)
 
 ## Performance Considerations
-- Parallel installs and updates reduce total time; tune thread count based on CPU and network conditions.
-- Mirror routing and retries improve reliability under unstable networks.
-- Site-packages caching avoids repeated scans; consider clearing cache after major changes.
-- Snapshot and backup operations are I/O bound; prefer off-peak times for large environments.
-- Use “inherit system site-packages” sparingly to avoid bloated venvs and conflicts.
-
-[No sources needed since this section provides general guidance]
+- **Parallel installs** and updates reduce total time; tune thread count based on CPU and network conditions.
+- **Mirror routing** and retries improve reliability under unstable networks.
+- **Site-packages caching** avoids repeated scans; consider clearing cache after major changes.
+- **Snapshot and backup operations** are I/O bound; prefer off-peak times for large environments.
+- **Use "inherit system site-packages"** sparingly to avoid bloated venvs and conflicts.
 
 ## Troubleshooting Guide
-- Invalid venv name: Ensure alphanumeric start and allowed characters; length limit enforced.
-- Base Python not found: Verify path exists and is executable; select from detected environments.
-- pip missing: Use “Repair pip” to reinitialize via ensurepip or get-pip.py fallback.
-- Path traversal protection: Deletion and backup ID validation prevent unsafe paths.
-- Timeout errors: Increase operation timeouts or check network/mirror settings.
-- Rollback triggered: If an operation fails with rollback enabled, restore previous state automatically; review logs for details.
+- **Invalid venv name**: Ensure alphanumeric start and allowed characters; length limit enforced.
+- **Base Python not found**: Verify path exists and is executable; select from detected environments.
+- **pip missing**: Use "Repair pip" to reinitialize via ensurepip or get-pip.py fallback.
+- **Path traversal protection**: Deletion and backup ID validation prevent unsafe paths.
+- **Timeout errors**: Increase operation timeouts or check network/mirror settings.
+- **Rollback triggered**: If an operation fails with rollback enabled, restore previous state automatically; review logs for details.
 
 **Section sources**
 - [venvManager.js](file://core/operations/venvManager.js)
@@ -436,28 +442,36 @@ EnvMgr --> ProcRunner
 - [pages.js](file://renderer/js/pages.js)
 
 ## Conclusion
-PyLibMaster’s GUI streamlines virtual environment management with robust creation workflows, template-driven provisioning, and powerful tooling for dependency isolation, comparison, export/import, and backup/snapshot. By leveraging parallelism, mirror routing, and automatic rollback, users can confidently manage multiple environments for development and production scenarios while sharing configurations across teams.
-
-[No sources needed since this section summarizes without analyzing specific files]
+PyLibMaster's GUI streamlines virtual environment management with robust creation workflows, template-driven provisioning, and powerful tooling for dependency isolation, comparison, export/import, and backup/snapshot. By leveraging parallelism, mirror routing, and automatic rollback, users can confidently manage multiple environments for development and production scenarios while sharing configurations across teams.
 
 ## Appendices
 
 ### Practical Examples
 
-- Creating a Development Environment
-  - Open Environment page, enter a unique venv name, choose a recent Python version, keep pip included, do not inherit system site-packages, and click Create.
-  - Switch to the new venv and install project dependencies via Install page or import a requirements.txt.
+#### Creating a Development Environment
+- Open Environment page, enter a unique venv name, choose a recent Python version, keep pip included, do not inherit system site-packages, and click Create.
+- Switch to the new venv and install project dependencies via Install page or import a requirements.txt.
 
-- Creating a Production Environment
-  - Use a stable Python version, optionally inherit system site-packages if shared libraries are required, and pin versions in requirements.txt before importing.
-  - Enable rollback for risky operations and create a snapshot after successful setup.
+#### Creating a Production Environment
+- Use a stable Python version, optionally inherit system site-packages if shared libraries are required, and pin versions in requirements.txt before importing.
+- Enable rollback for risky operations and create a snapshot after successful setup.
 
-- Managing Multiple Project Environments
-  - Maintain separate venvs per project; use Templates page to bootstrap common stacks quickly.
-  - Compare environments to audit differences and align dependencies across dev/stage/prod.
+#### Managing Multiple Project Environments
+- Maintain separate venvs per project; use Templates page to bootstrap common stacks quickly.
+- Compare environments to audit differences and align dependencies across dev/stage/prod.
 
-- Sharing Environment Configurations
-  - Export requirements.txt from a reference environment and share with teammates.
-  - Team members import the file into their local environments; verify with compare tool.
+#### Sharing Environment Configurations
+- Export requirements.txt from a reference environment and share with teammates.
+- Team members import the file into their local environments; verify with compare tool.
+
+#### Using Template-Based Setup
+- Navigate to Templates page and select appropriate template (Web, Data, ML, etc.).
+- Enter venv name and base Python, then click "Create & Install" for automated setup.
+- Templates automatically create venv and install all required packages.
+
+#### Working with Snapshots and Backups
+- Create snapshots before major changes to enable rollback.
+- Use snapshot restore to revert to previous environment states.
+- Leverage automatic backups during risky operations for safety.
 
 [No sources needed since this section provides general guidance]

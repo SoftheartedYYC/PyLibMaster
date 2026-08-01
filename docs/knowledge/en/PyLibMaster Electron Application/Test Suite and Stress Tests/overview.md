@@ -1,0 +1,1 @@
+Node.js test suite providing unit tests for core operations and package installation workflows, plus comprehensive stress tests that mock Electron, processRunner, and all core managers to validate edge cases, concurrency, and rollback behavior.

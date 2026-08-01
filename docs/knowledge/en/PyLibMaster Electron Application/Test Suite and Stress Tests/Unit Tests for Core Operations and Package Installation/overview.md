@@ -1,0 +1,1 @@
+Node.js unit tests covering pip package specification building, backup validation, path security checks, directory mapping, size estimation, and the full installPackages workflow with mock-based isolation of processRunner, envManager, configManager, mirrorManager, backupManager, and logManager.

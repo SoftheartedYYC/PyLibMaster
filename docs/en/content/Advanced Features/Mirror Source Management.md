@@ -11,6 +11,12 @@
 - [pages.js](file://renderer/js/pages.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated file path references from `core/mirrorManager.js` to `core/config/mirrorManager.js` throughout the document
+- Updated import statements and module references to reflect the new configuration layer structure
+- Maintained all functional descriptions while correcting file locations
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -24,7 +30,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains PyLibMaster’s mirror source optimization system. It covers how the application manages multiple download mirrors, performs automatic speed testing, selects routes intelligently, and handles failover during package installation. It also documents built-in mirror configurations, how to add custom mirrors, procedures for testing mirrors, and strategies to optimize performance. Network timeout handling, retry logic, and guidance for configuring region-specific mirrors are included. While geographic proximity-based selection is not implemented directly, you can achieve similar outcomes by ordering mirrors based on your region or using smart routing with measured speeds.
+This document explains PyLibMaster's mirror source optimization system. It covers how the application manages multiple download mirrors, performs automatic speed testing, selects routes intelligently, and handles failover during package installation. It also documents built-in mirror configurations, how to add custom mirrors, procedures for testing mirrors, and strategies to optimize performance. Network timeout handling, retry logic, and guidance for configuring region-specific mirrors are included. While geographic proximity-based selection is not implemented directly, you can achieve similar outcomes by ordering mirrors based on your region or using smart routing with measured speeds.
 
 ## Project Structure
 The mirror system spans configuration, operations, and process execution layers:
@@ -40,10 +46,10 @@ UI["UI Pages<br/>pages.js"]
 end
 subgraph "Main Process"
 IPC["IPC Handlers<br/>main.js"]
-MM["Mirror Manager<br/>mirrorManager.js"]
-CM["Config Manager<br/>configManager.js"]
-PM["Pip Manager<br/>pipManager.js"]
-PR["Process Runner<br/>processRunner.js"]
+MM["Mirror Manager<br/>core/config/mirrorManager.js"]
+CM["Config Manager<br/>core/config/configManager.js"]
+PM["Pip Manager<br/>core/operations/pipManager.js"]
+PR["Process Runner<br/>utils/processRunner.js"]
 end
 UI --> IPC
 IPC --> MM
@@ -139,7 +145,7 @@ Responsibilities:
 Key behaviors:
 - Built-in mirrors include official PyPI and several regional providers.
 - Smart routing toggles between user-selected default and fastest mirror.
-- Speed test returns 9999ms for failures; batch tests update each mirror’s speed.
+- Speed test returns 9999ms for failures; batch tests update each mirror's speed.
 - Reordering allows prioritizing mirrors by drag-and-drop.
 
 ```mermaid
@@ -316,7 +322,7 @@ Operational tips:
 - [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)
 
 ## Conclusion
-PyLibMaster’s mirror source optimization system provides robust management of multiple mirrors, intelligent route selection, and resilient installation workflows. By combining speed testing, configurable retries, and pip configuration writing, it ensures fast and reliable package management across diverse network environments. Users can tailor mirror priorities per region and leverage smart routing for dynamic optimization.
+PyLibMaster's mirror source optimization system provides robust management of multiple mirrors, intelligent route selection, and resilient installation workflows. By combining speed testing, configurable retries, and pip configuration writing, it ensures fast and reliable package management across diverse network environments. Users can tailor mirror priorities per region and leverage smart routing for dynamic optimization.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -348,8 +354,8 @@ PyLibMaster’s mirror source optimization system provides robust management of 
 - When disabled, the user-selected default mirror is used.
 
 **Section sources**
-- [mirrorManager.js:250-260](file://core/config/mirrorManager.js#L250-L260)
-- [mirrorManager.js:284-290](file://core/config/mirrorManager.js#L284-L290)
+- [mirrorManager.js:250-260](file://core/config/mirrorManager.js#L250-260)
+- [mirrorManager.js:284-290](file://core/config/mirrorManager.js#L284-290)
 
 ### Failover Mechanisms
 - Pip Manager tries multiple mirrors in order, limited by retryCount and mirror list length.
@@ -387,5 +393,5 @@ PyLibMaster’s mirror source optimization system provides robust management of 
 
 **Section sources**
 - [configManager.js:21-29](file://core/config/configManager.js#L21-L29)
-- [mirrorManager.js:250-260](file://core/config/mirrorManager.js#L250-L260)
+- [mirrorManager.js:250-260](file://core/config/mirrorManager.js#L250-260)
 - [processRunner.js:233-278](file://utils/processRunner.js#L233-L278)

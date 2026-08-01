@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: core
+title: PyLibMaster 核心层（配置、操作与系统管理）
+scope:
+    - core/
+source_files: []
+depends_on: []
+related_to:
+    - path: renderer

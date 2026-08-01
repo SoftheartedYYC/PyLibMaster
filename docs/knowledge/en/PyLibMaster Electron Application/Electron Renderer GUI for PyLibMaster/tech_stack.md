@@ -1,0 +1,1 @@
+Plain HTML/CSS/JavaScript running inside an Electron renderer process; communicates with the main process through a preload-exposed `window.electronAPI`; uses inline SVG icons, CSS custom properties (`var(--*)`) for theming, and a CSP that restricts scripts/styles to `'self'` with `'unsafe-inline'` for inline handlers.

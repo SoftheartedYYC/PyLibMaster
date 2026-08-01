@@ -15,8 +15,17 @@
 - [logManager.js](file://core/system/logManager.js)
 - [backupManager.js](file://core/operations/backupManager.js)
 - [explorerManager.js](file://core/system/explorerManager.js)
+- [schedulerManager.js](file://core/config/schedulerManager.js)
 - [app.js](file://renderer/js/app.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated all module import paths to reflect new modularized structure under core/config/, core/operations/, and core/system/
+- Revised architecture diagrams to show new module organization
+- Updated dependency analysis to reflect new internal module structure
+- Enhanced documentation with new module organization patterns
+- Added references to schedulerManager.js for automated update functionality
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -31,8 +40,8 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document provides comprehensive API documentation for PyLibMaster’s IPC interfaces and module APIs. It covers:
-- All main-renderer IPC handlers exposed via Electron’s preload bridge
+This document provides comprehensive API documentation for PyLibMaster's IPC interfaces and module APIs. It covers:
+- All main-renderer IPC handlers exposed via Electron's preload bridge
 - Request/response schemas, error handling patterns, and authentication methods
 - Pip manager API for package operations (install/uninstall/update/search/export/import/compare/diff/releases/graph/download)
 - Environment manager API for Python environment detection and switching
@@ -40,6 +49,8 @@ This document provides comprehensive API documentation for PyLibMaster’s IPC i
 - Utility functions for process management, configuration, mirrors, logging, backups, and Windows Explorer integration
 - Parameter validation, return value specifications, async operation handling, progress events, and cancellation
 - Client implementation examples, error handling strategies, performance optimization techniques, security considerations, and input sanitization patterns
+
+**Updated** The internal API structure has been modularized with organized paths under core/config/, core/operations/, and core/system/ directories for better maintainability and separation of concerns.
 
 ## Project Structure
 PyLibMaster is an Electron application with a clear separation between the main process, preload bridge, renderer UI, core modules, and utilities. The main process registers all IPC handlers that delegate to core modules. The preload script exposes a safe API surface to the renderer. Core modules encapsulate business logic (pip, env, venv, backup, mirror, config, logs). Utilities provide process execution, security checks, and system integrations.
@@ -55,15 +66,24 @@ end
 subgraph "Main Process"
 Main["main.js"]
 end
-subgraph "Core Modules"
+subgraph "Core Modules - Config"
+Config["core/config/configManager.js"]
+Mirror["core/config/mirrorManager.js"]
+Scheduler["core/config/schedulerManager.js"]
+end
+subgraph "Core Modules - Operations"
 Pip["core/operations/pipManager.js"]
-Env["core/system/envManager.js"]
 Venv["core/operations/venvManager.js"]
 Backup["core/operations/backupManager.js"]
-Mirror["core/config/mirrorManager.js"]
-Config["core/config/configManager.js"]
-Log["core/system/logManager.js"]
+Template["core/operations/templateManager.js"]
+Audit["core/operations/auditManager.js"]
+Undo["core/operations/undoManager.js"]
+end
+subgraph "Core Modules - System"
+Env["core/system/envManager.js"]
 Explorer["core/system/explorerManager.js"]
+Log["core/system/logManager.js"]
+Updater["core/system/updater.js"]
 end
 subgraph "Utilities"
 Proc["utils/processRunner.js"]
@@ -79,6 +99,11 @@ Main --> Mirror
 Main --> Config
 Main --> Log
 Main --> Explorer
+Main --> Scheduler
+Main --> Template
+Main --> Audit
+Main --> Undo
+Main --> Updater
 Pip --> Proc
 Venv --> Proc
 Env --> Proc
@@ -88,16 +113,17 @@ Main --> Sec
 ```
 
 **Diagram sources**
-- [main.js:1-640](file://main.js#L1-L640)
+- [main.js:17-30](file://main.js#L17-L30)
 - [preload.js:1-221](file://preload.js#L1-L221)
-- [pipManager.js:1-800](file://core/operations/pipManager.js#L1-L800)
+- [pipManager.js:1-200](file://core/operations/pipManager.js#L1-L200)
 - [envManager.js:1-220](file://core/system/envManager.js#L1-L220)
 - [venvManager.js:1-278](file://core/operations/venvManager.js#L1-L278)
 - [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
 - [mirrorManager.js:1-376](file://core/config/mirrorManager.js#L1-L376)
 - [configManager.js:1-194](file://core/config/configManager.js#L1-L194)
-- [logManager.js:1-173](file://core/system/logManager.js#L1-L173)
+- [logManager.js:1-176](file://core/system/logManager.js#L1-L176)
 - [explorerManager.js:1-120](file://core/system/explorerManager.js#L1-L120)
+- [schedulerManager.js:1-197](file://core/config/schedulerManager.js#L1-L197)
 - [processRunner.js:1-366](file://utils/processRunner.js#L1-L366)
 - [security.js:1-43](file://utils/security.js#L1-L43)
 
@@ -112,7 +138,15 @@ Main --> Sec
 - Pip Manager: Full-featured package operations with parallelism, retries, rollback, caching, dependency analysis, disk usage, releases, graph, download, diff.
 - Environment Manager: Detects Python environments, returns versions, switches current environment, persists selection.
 - Virtual Environment Manager: Create/list/delete/query venvs with safety checks and output callbacks.
-- Utilities: Process runner (spawn, timeout, cancel), security path validation, config persistence, mirror management, logging, backups, Windows Explorer context menu.
+- Configuration Manager: Persistent JSON configuration with validation and atomic writes.
+- Mirror Manager: PyPI mirror management with speed testing and smart routing.
+- Log Manager: Operation logging with filtering, search, and debounced persistence.
+- Backup Manager: Environment backup/restore with pip freeze and force-reinstall.
+- Explorer Manager: Windows context menu integration for file operations.
+- Scheduler Manager: Automated package updates with configurable frequency and whitelisting.
+- Utilities: Process runner (spawn, timeout, cancel), security path validation.
+
+**Updated** Module imports now use organized paths under core/config/, core/operations/, and core/system/ for better code organization and maintainability.
 
 **Section sources**
 - [main.js:233-640](file://main.js#L233-L640)
@@ -124,9 +158,10 @@ Main --> Sec
 - [security.js:1-43](file://utils/security.js#L1-L43)
 - [configManager.js:1-194](file://core/config/configManager.js#L1-L194)
 - [mirrorManager.js:1-376](file://core/config/mirrorManager.js#L1-L376)
-- [logManager.js:1-173](file://core/system/logManager.js#L1-L173)
+- [logManager.js:1-176](file://core/system/logManager.js#L1-L176)
 - [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
 - [explorerManager.js:1-120](file://core/system/explorerManager.js#L1-L120)
+- [schedulerManager.js:1-197](file://core/config/schedulerManager.js#L1-L197)
 
 ## Architecture Overview
 The IPC architecture follows a secure bridge pattern:
@@ -141,8 +176,8 @@ sequenceDiagram
 participant UI as "Renderer (app.js)"
 participant Bridge as "Preload (preload.js)"
 participant Main as "Main (main.js)"
-participant Pip as "Pip Manager"
-participant Proc as "Process Runner"
+participant Pip as "core/operations/pipManager.js"
+participant Proc as "utils/processRunner.js"
 UI->>Bridge : electronAPI.installPackages(packages, options)
 Bridge->>Main : ipcRenderer.invoke("pip : install", packages, options)
 Main->>Pip : installPackages(packages, options, onOutput)
@@ -336,11 +371,12 @@ Client Implementation Notes
 - [venvManager.js:1-278](file://core/operations/venvManager.js#L1-L278)
 - [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
 - [mirrorManager.js:1-376](file://core/config/mirrorManager.js#L1-L376)
-- [logManager.js:1-173](file://core/system/logManager.js#L1-L173)
+- [logManager.js:1-176](file://core/system/logManager.js#L1-L176)
 - [configManager.js:1-194](file://core/config/configManager.js#L1-L194)
 - [processRunner.js:1-366](file://utils/processRunner.js#L1-L366)
 - [security.js:1-43](file://utils/security.js#L1-L43)
 - [explorerManager.js:1-120](file://core/system/explorerManager.js#L1-L120)
+- [schedulerManager.js:1-197](file://core/config/schedulerManager.js#L1-L197)
 
 ### Pip Manager API
 Responsibilities:
@@ -555,7 +591,7 @@ Limits:
 - Search keyword max 200 chars
 
 **Section sources**
-- [logManager.js:1-173](file://core/system/logManager.js#L1-L173)
+- [logManager.js:1-176](file://core/system/logManager.js#L1-L176)
 
 ### Backup Manager
 Responsibilities:
@@ -589,11 +625,35 @@ Functions:
 - getStatus(): Object
 
 Behavior:
-- Adds “Open with PyLibMaster” and “Create virtual environment here” menu items
+- Adds "Open with PyLibMaster" and "Create virtual environment here" menu items
 - Logs actions and handles errors gracefully
 
 **Section sources**
 - [explorerManager.js:1-120](file://core/system/explorerManager.js#L1-L120)
+
+### Scheduler Manager
+Responsibilities:
+- Schedule automatic package updates at configurable intervals
+- Support daily and weekly update frequencies
+- Maintain whitelist of packages to exclude from automatic updates
+- Track execution status and last run times
+
+Functions:
+- getSchedulerConfig(): Object
+- saveSchedulerConfig(updates): void
+- runAutoUpdate(notify): Promise<Object>
+- startScheduler(notify): void
+- stopScheduler(): void
+- getStatus(): Object
+
+Configuration:
+- enabled: boolean flag for scheduler activation
+- frequency: 'daily' or 'weekly' scheduling mode
+- whitelist: array of package names to skip automatic updates
+- lastRun: ISO timestamp of last successful execution
+
+**Section sources**
+- [schedulerManager.js:1-197](file://core/config/schedulerManager.js#L1-L197)
 
 ## Dependency Analysis
 High-level dependencies:
@@ -606,18 +666,20 @@ High-level dependencies:
 - backupManager depends on processRunner, configManager, logManager
 - logManager depends on configManager
 - explorerManager depends on logManager
+- schedulerManager depends on configManager, logManager, pipManager
 
 ```mermaid
 graph LR
-Main["main.js"] --> Pip["pipManager.js"]
-Main --> Env["envManager.js"]
-Main --> Venv["venvManager.js"]
-Main --> Backup["backupManager.js"]
-Main --> Mirror["mirrorManager.js"]
-Main --> Config["configManager.js"]
-Main --> Log["logManager.js"]
-Main --> Explorer["explorerManager.js"]
-Pip --> Proc["processRunner.js"]
+Main["main.js"] --> Pip["core/operations/pipManager.js"]
+Main --> Env["core/system/envManager.js"]
+Main --> Venv["core/operations/venvManager.js"]
+Main --> Backup["core/operations/backupManager.js"]
+Main --> Mirror["core/config/mirrorManager.js"]
+Main --> Config["core/config/configManager.js"]
+Main --> Log["core/system/logManager.js"]
+Main --> Explorer["core/system/explorerManager.js"]
+Main --> Scheduler["core/config/schedulerManager.js"]
+Pip --> Proc["utils/processRunner.js"]
 Pip --> Mirror
 Pip --> Backup
 Pip --> Config
@@ -628,18 +690,22 @@ Backup --> Proc
 Mirror --> Proc
 Log --> Config
 Explorer --> Log
+Scheduler --> Config
+Scheduler --> Log
+Scheduler --> Pip
 ```
 
 **Diagram sources**
-- [main.js:1-640](file://main.js#L1-L640)
-- [pipManager.js:1-800](file://core/operations/pipManager.js#L1-L800)
-- [envManager.js:1-220](file://core/system/envManager.js#L1-L220)
-- [venvManager.js:1-278](file://core/operations/venvManager.js#L1-L278)
-- [backupManager.js:1-196](file://core/operations/backupManager.js#L1-L196)
-- [mirrorManager.js:1-376](file://core/config/mirrorManager.js#L1-L376)
-- [configManager.js:1-194](file://core/config/configManager.js#L1-L194)
-- [logManager.js:1-173](file://core/system/logManager.js#L1-L173)
-- [explorerManager.js:1-120](file://core/system/explorerManager.js#L1-L120)
+- [main.js:17-30](file://main.js#L17-L30)
+- [pipManager.js:22-27](file://core/operations/pipManager.js#L22-L27)
+- [envManager.js:22-23](file://core/system/envManager.js#L22-L23)
+- [venvManager.js:18-20](file://core/operations/venvManager.js#L18-L20)
+- [backupManager.js:21-23](file://core/operations/backupManager.js#L21-L23)
+- [mirrorManager.js:18-19](file://core/config/mirrorManager.js#L18-L19)
+- [configManager.js:17-19](file://core/config/configManager.js#L17-L19)
+- [logManager.js:17](file://core/system/logManager.js#L17)
+- [explorerManager.js:13](file://core/system/explorerManager.js#L13)
+- [schedulerManager.js:18-19](file://core/config/schedulerManager.js#L18-L19)
 - [processRunner.js:1-366](file://utils/processRunner.js#L1-L366)
 
 **Section sources**
@@ -652,6 +718,7 @@ Explorer --> Log
 - Leverage debounced logging and atomic config writes to minimize I/O contention
 - Avoid redundant scans by relying on site-packages path cache and installed cache TTL
 - Cancel long-running operations via operationId when appropriate
+- Utilize scheduler for background maintenance tasks to avoid blocking UI
 
 [No sources needed since this section provides general guidance]
 
@@ -664,6 +731,7 @@ Common issues and resolutions:
 - Mirror failures: test mirrors and adjust order; enable smartRoute
 - Conflicting packages: run healthCheck and checkConflicts to diagnose
 - Undo operations: use undo:perform to revert recent changes
+- Scheduler not running: check configuration and verify timer initialization
 
 Error propagation:
 - Core modules throw descriptive Error objects
@@ -677,6 +745,8 @@ Error propagation:
 
 ## Conclusion
 PyLibMaster provides a robust, secure, and high-performance IPC interface for managing Python environments and packages. The modular architecture ensures clear separation of concerns, while comprehensive validation and error handling maintain reliability. Clients can implement efficient workflows using async operations, progress events, and cancellation. Security is enforced through input sanitization, path allowlists, and sandboxing.
+
+**Updated** The new modularized structure under core/config/, core/operations/, and core/system/ directories provides better code organization, maintainability, and scalability for future enhancements.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -701,3 +771,24 @@ PyLibMaster provides a robust, secure, and high-performance IPC interface for ma
 - [pipManager.js:154-235](file://core/operations/pipManager.js#L154-L235)
 - [security.js:28-40](file://utils/security.js#L28-L40)
 - [backupManager.js:62-78](file://core/operations/backupManager.js#L62-L78)
+
+### Module Organization Migration Guide
+For external integrations updating from old root-level modules to new organized paths:
+
+**Old Import Paths:**
+- `require('./pipManager')` → `require('./core/operations/pipManager')`
+- `require('./envManager')` → `require('./core/system/envManager')`
+- `require('./configManager')` → `require('./core/config/configManager')`
+- `require('./mirrorManager')` → `require('./core/config/mirrorManager')`
+- `require('./logManager')` → `require('./core/system/logManager')`
+- `require('./backupManager')` → `require('./core/operations/backupManager')`
+- `require('./explorerManager')` → `require('./core/system/explorerManager')`
+
+**New Module Categories:**
+- **core/config/**: Configuration management, mirror management, scheduler management
+- **core/operations/**: Business logic operations (pip, venv, backup, templates, audit, undo)
+- **core/system/**: System-level functionality (environment, explorer, logging, updater)
+- **utils/**: Shared utilities (process runner, security)
+
+**Section sources**
+- [main.js:17-30](file://main.js#L17-L30)

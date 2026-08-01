@@ -1,5 +1,5 @@
-- IPC channels follow a `<domain>:<action>` naming convention (e.g. `pip:install`, `env:switch`, `mirror:testAll`) consistently across `main.js` handlers and `preload.js` wrappers.
-- Long-running operations accept a callback `(data, type) => event.sender.send('pip:progress', { operation, data, type })` to stream progress back to the renderer.
-- Renderer-facing APIs are exposed exclusively through `contextBridge.exposeInMainWorld('electronAPI', {...})` in `preload.js`; the renderer never requires Node modules directly.
-- BrowserWindow is created with `contextIsolation: true`, `nodeIntegration: false`, and a `preload` script — no other window creation bypasses these security settings.
-- Each core feature lives in its own `core/<domain>/<manager>.js` module and is imported once at the top of `main.js`, then invoked by matching IPC handlers.
+- Every renderer-to-main communication goes through `ipcRenderer.invoke` with a `domain:action` channel name (e.g. `pip:install`, `mirror:testAll`, `config:setBulk`), and the corresponding `ipcMain.handle` in `main.js` delegates to the appropriate `core/` manager.
+- Long-running operations expose progress by calling `event.sender.send('pip:progress', { operation, data, type })` so the renderer can stream updates without polling.
+- One-way events from main to renderer use `mainWindow.webContents.send('<channel>', payload)` and are consumed in `preload.js` via `ipcRenderer.on` wrappers such as `onThemeChanged`, `onUpdatesAvailable`, `onSchedulerExecuted`.
+- The preload script exposes only whitelisted functions on `window.electronAPI`; rendering code never imports Node modules directly, preserving context isolation.
+- Core managers are required inside `main.js` at startup and invoked purely through their public methods — the renderer has no direct dependency on `core/`.

@@ -12,6 +12,13 @@
 - [operations.js](file://renderer/js/operations.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated built-in template types to reflect enhanced project templates for common development scenarios
+- Added detailed descriptions of new template categories including Web development, data analysis, machine learning, web scraping, and automation
+- Enhanced template examples with specific package lists for each scenario
+- Updated documentation to reflect the comprehensive template capabilities now available
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -25,7 +32,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains PyLibMaster’s template system, which provides pre-configured project setups with predefined dependencies, configurations, and environment settings. It covers how templates are defined, created, customized, and deployed into isolated Python virtual environments. It also documents built-in template types, custom template development, snapshot-based versioning and rollback, and integration with virtual environment creation and package installation. Examples for common frameworks (Django, Flask, FastAPI) and data science environments are provided conceptually to guide users in selecting or creating appropriate templates.
+This document explains PyLibMaster's template system, which provides pre-configured project setups with predefined dependencies, configurations, and environment settings. The system includes comprehensive built-in templates for common development scenarios including Web development (Flask, Django), data analysis, machine learning, web scraping, and automation tasks. It covers how templates are defined, created, customized, and deployed into isolated Python virtual environments. It also documents built-in template types, custom template development, snapshot-based versioning and rollback, and integration with virtual environment creation and package installation. Examples for common frameworks and data science environments are provided conceptually to guide users in selecting or creating appropriate templates.
 
 ## Project Structure
 The template system spans the core operations layer, process execution utilities, configuration storage, IPC wiring, and renderer UI:
@@ -82,7 +89,7 @@ T_tpl --> C_cfg
 - [operations.js:518-536](file://renderer/js/operations.js#L518-L536)
 
 ## Core Components
-- Template definitions and lifecycle: Built-in templates and custom templates are managed, listed, added, removed, and used to create environments.
+- Template definitions and lifecycle: Built-in templates for common development scenarios and custom templates are managed, listed, added, removed, and used to create environments.
 - Virtual environment creation: Isolated environments are created with configurable options and validated names.
 - Package installation: Templates specify packages; installation supports parallelism, retries, and progress reporting.
 - Snapshots: Environments can be snapshotted and restored, enabling versioning and rollback.
@@ -151,7 +158,7 @@ IPC-->>UI : "progress events and final result"
 
 ### Template Manager
 Responsibilities:
-- Provide built-in templates for web frameworks and data science stacks.
+- Provide built-in templates for common development scenarios including Web development, data analysis, machine learning, web scraping, and automation.
 - Manage custom templates persisted in application configuration.
 - Orchestrate environment creation and package installation from a selected template.
 - Implement snapshot lifecycle: create, list, detail, restore, delete.
@@ -186,11 +193,11 @@ Log --> End
 - [templateManager.js:72-98](file://core/operations/templateManager.js#L72-L98)
 - [templateManager.js:105-110](file://core/operations/templateManager.js#L105-L110)
 - [templateManager.js:118-154](file://core/operations/templateManager.js#L118-L154)
-- [templateManager.js:175-209](file://core/operations/templateManager.js#L175-L209)
-- [templateManager.js:215-236](file://core/operations/templateManager.js#L215-L236)
-- [templateManager.js:243-248](file://core/operations/templateManager.js#L243-L248)
-- [templateManager.js:257-292](file://core/operations/templateManager.js#L257-L292)
-- [templateManager.js:299-307](file://core/operations/templateManager.js#L299-L307)
+- [templateManager.js:175-209](file://core/operations/templateManager.js#L175-209)
+- [templateManager.js:215-236](file://core/operations/templateManager.js#L215-236)
+- [templateManager.js:243-248](file://core/operations/templateManager.js#L243-248)
+- [templateManager.js:257-292](file://core/operations/templateManager.js#L257-292)
+- [templateManager.js:299-307](file://core/operations/templateManager.js#L299-307)
 
 ### Virtual Environment Manager
 Responsibilities:
@@ -264,7 +271,7 @@ ThrowError --> ReleaseLock
 **Diagram sources**
 - [pipManager.js:513-596](file://core/operations/pipManager.js#L513-L596)
 - [pipManager.js:608-633](file://core/operations/pipManager.js#L608-L633)
-- [pipManager.js:233-278](file://core/operations/pipManager.js#L233-L278)
+- [pipManager.js:233-278](file://core/operations/pipManager.js#L233-278)
 
 **Section sources**
 - [pipManager.js:154-235](file://core/operations/pipManager.js#L154-L235)
@@ -420,19 +427,21 @@ Operational tips:
 - [main.js:548-575](file://main.js#L548-L575)
 
 ## Conclusion
-PyLibMaster’s template system streamlines environment setup by combining predefined dependency sets with automated venv creation and package installation. It supports custom templates, robust error handling, and snapshot-based versioning for reliable rollbacks. Through clear IPC integration and user-friendly UI flows, developers can quickly bootstrap projects for web frameworks and data science workflows while maintaining control over environment state and reproducibility.
+PyLibMaster's template system streamlines environment setup by combining predefined dependency sets with automated venv creation and package installation. With comprehensive built-in templates for common development scenarios including Web development, data analysis, machine learning, web scraping, and automation, developers can quickly bootstrap projects while maintaining control over environment state and reproducibility. The system supports custom templates, robust error handling, and snapshot-based versioning for reliable rollbacks. Through clear IPC integration and user-friendly UI flows, it provides a complete solution for Python environment management.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
 ## Appendices
 
 ### Built-in Template Types
-- Web Development (Flask): includes Flask ecosystem and deployment helpers.
-- Web Development (Django): includes Django stack and database drivers.
-- Data Analysis: includes numpy, pandas, matplotlib, seaborn, jupyter, etc.
-- Machine Learning: includes scikit-learn, torch, tensorflow, keras, and related tools.
-- Crawler Development: includes requests, scrapy, beautifulsoup4, selenium, aiohttp.
-- Automation Office: includes openpyxl, python-docx, pdfplumber, pillow, schedule.
+The enhanced template system includes comprehensive built-in templates for common development scenarios:
+
+- **Web Development (Flask)**: Flask ecosystem with CORS, SQLAlchemy, migrations, Jinja2, Werkzeug, requests, Gunicorn, and dotenv support.
+- **Web Development (Django)**: Full-stack Django development with REST framework, CORS headers, filtering, Celery, Redis, database drivers, and deployment tools.
+- **Data Analysis**: Complete data science stack including NumPy, Pandas, Matplotlib, Seaborn, SciPy, Jupyter, Excel support, and statistical modeling.
+- **Machine Learning**: Comprehensive ML/DL toolkit with scikit-learn, PyTorch, TensorFlow, Keras, visualization tools, and progress tracking.
+- **Web Scraping (Crawler)**: Advanced web scraping with requests, Scrapy, BeautifulSoup, lxml, Selenium, user agent management, and async HTTP.
+- **Automation Office**: Office automation with Excel, Word, PowerPoint, PDF processing, image manipulation, GUI automation, and scheduling.
 
 These templates provide curated package lists suitable for common scenarios. Users can extend or customize them via custom templates.
 
@@ -469,8 +478,8 @@ Restoration workflow:
 - Create snapshot -> store JSON with package list -> restore by writing requirements and installing via pip.
 
 **Section sources**
-- [templateManager.js:175-209](file://core/operations/templateManager.js#L175-L209)
-- [templateManager.js:257-292](file://core/operations/templateManager.js#L257-L292)
+- [templateManager.js:175-209](file://core/operations/templateManager.js#L175-209)
+- [templateManager.js:257-292](file://core/operations/templateManager.js#L257-292)
 - [pipManager.js:154-235](file://core/operations/pipManager.js#L154-L235)
 
 ### Integration with Virtual Environment Creation
@@ -485,10 +494,15 @@ Restoration workflow:
 - [processRunner.js:85-161](file://utils/processRunner.js#L85-L161)
 
 ### Common Template Patterns for Frameworks
-- Django: django, djangorestframework, django-cors-headers, django-filter, celery, redis, psycopg2-binary, python-dotenv.
-- Flask: flask, flask-cors, flask-sqlalchemy, flask-migrate, jinja2, werkzeug, gunicorn, python-dotenv.
-- FastAPI: fastapi, uvicorn, pydantic, httpx, python-multipart, python-dotenv.
-- Data Science: numpy, pandas, matplotlib, seaborn, scipy, jupyter, openpyxl, statsmodels.
+Enhanced template patterns aligned with built-in templates:
+
+- **Django**: django, djangorestframework, django-cors-headers, django-filter, celery, redis, psycopg2-binary, python-dotenv, requests.
+- **Flask**: flask, flask-cors, flask-sqlalchemy, flask-migrate, jinja2, werkzeug, gunicorn, python-dotenv, requests.
+- **FastAPI**: fastapi, uvicorn, pydantic, httpx, python-multipart, python-dotenv.
+- **Data Science**: numpy, pandas, matplotlib, seaborn, scipy, jupyter, openpyxl, xlrd, statsmodels.
+- **Machine Learning**: scikit-learn, torch, torchvision, tensorflow, keras, numpy, pandas, matplotlib, jupyter, tqdm.
+- **Web Scraping**: requests, scrapy, beautifulsoup4, lxml, selenium, fake-useragent, pandas, aiohttp.
+- **Automation**: openpyxl, python-docx, python-pptx, pdfplumber, pillow, pyautogui, schedule, requests.
 
 These patterns align with built-in templates and can be adapted for custom templates.
 
