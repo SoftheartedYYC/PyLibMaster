@@ -1,10 +1,10 @@
 {
   "name": "pylibmaster",
-  "version": "1.5.17",
+  "version": "1.5.23",
   "description": "Python 库管理工具",
   "main": "main.js",
   "author": "SoftheartedYYC",
-  "email": "1247449619@qq.com",
+  "email": "softheartedyyc@gmail.com",
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "start": "electron .",
@@ -14,7 +14,7 @@
     "dist": "npm run build:win"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
+    "electron": "31.7.7",
     "electron-builder": "^25.0.0"
   },
   "dependencies": {
@@ -28,7 +28,7 @@
   "build": {
     "appId": "com.softheartedyyc.pylibmaster",
     "productName": "PyLibMaster",
-    "icon": "renderer/icon.ico",
+    "icon": "renderer/assets/icon.ico",
     "directories": {
       "output": "dist"
     },
@@ -44,7 +44,7 @@
       "node_modules/**/*"
     ],
     "win": {
-      "icon": "renderer/icon.ico",
+      "icon": "renderer/assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -53,7 +53,7 @@
           ]
         }
       ],
-      "signAndEditExecutable": false,
+      "signAndEditExecutable": true,
       "verifyUpdateCodeSignature": false
     },
     "nsis": {
@@ -61,9 +61,9 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "installerIcon": "renderer/icon.ico",
-      "uninstallerIcon": "renderer/icon.ico",
-      "installerHeaderIcon": "renderer/icon.ico",
+      "installerIcon": "renderer/assets/icon.ico",
+      "uninstallerIcon": "renderer/assets/icon.ico",
+      "installerHeaderIcon": "renderer/assets/icon.ico",
       "license": "build/license.txt"
     },
     "publish": {
@@ -71,5 +71,8 @@
       "owner": "SoftheartedYYC",
       "repo": "PyLibMaster"
     }
+  },
+  "allowScripts": {
+    "electron@31.7.7": true
   }
 }

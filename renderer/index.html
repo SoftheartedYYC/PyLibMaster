@@ -1,23 +1,46 @@
 <!DOCTYPE html>
+<!--
+  @file index.html
+  @description PyLibMaster 主界面 HTML
+  
+  页面结构：
+  - 自定义标题栏（窗口控制按钮：刷新/最小化/最大化/关闭）
+  - 侧边栏导航（核心操作、配置管理、系统三组）
+  - 内容区域（9 个页面：安装/卸载/更新/查询/镜像/环境/日志/设置/关于）
+  - 底部状态栏（已安装数/可更新数/Python版本）
+  - 备份确认模态对话框
+  - Toast 提示容器
+  
+  脚本加载顺序（均位于 js/ 目录，后者依赖前者）：
+  1. js/i18n.js - 国际化字典
+  2. js/core.js - 全局状态和工具
+  3. js/render.js - 表格渲染
+  4. js/progress.js - 进度条 UI
+  5. js/operations.js - 操作逻辑
+  6. js/pages.js - 页面交互
+  7. js/app.js - 事件绑定与初始化（入口）
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https: http:;">
 <title>PyLibMaster</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+<!-- 自定义标题栏（无边框窗口使用） -->
 <div class="titlebar">
   <div class="titlebar-logo" style="-webkit-app-region: no-drag;">
-    <div class="titlebar-logo-icon">
-      <img src="logo.png" alt="PyLibMaster" class="titlebar-logo-img">
-    </div>
     <div class="titlebar-logo-text">PyLibMaster</div>
   </div>
   <div class="titlebar-actions">
     <button class="titlebar-btn" id="btn-global-refresh" onclick="refreshCurrentPage()" title="Refresh">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+    </button>
+    <button class="titlebar-btn" id="btn-undo" onclick="performUndo()" title="Undo" style="display:none;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 10h10a5 5 0 015 5v2M3 10l5-5M3 10l5 5"/></svg>
     </button>
     <button class="titlebar-btn" onclick="window.electronAPI.windowMinimize()" title="Minimize">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14"/></svg>
@@ -31,7 +54,9 @@
   </div>
 </div>
 
+<!-- 主布局：侧边栏 + 内容区 -->
 <div class="main-layout">
+  <!-- 侧边栏导航 -->
   <div class="sidebar">
     <div class="sidebar-nav">
       <div class="sidebar-group-label" data-i18n="nav.core">核心操作</div>
@@ -51,6 +76,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <span data-i18n="nav.query">查询库</span>
       </div>
+      <div class="sidebar-item" data-page="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span data-i18n="nav.templates">项目模板</span>
+      </div>
+      <div class="sidebar-item" data-page="pypi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span data-i18n="nav.pypi">PyPI 浏览</span>
+      </div>
       <div class="sidebar-divider"></div>
       <div class="sidebar-group-label" data-i18n="nav.config">配置管理</div>
       <div class="sidebar-item" data-page="mirror">
@@ -64,6 +97,14 @@
       <div class="sidebar-item" data-page="logs">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
         <span data-i18n="nav.logs">操作日志</span>
+      </div>
+      <div class="sidebar-item" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        <span data-i18n="nav.dashboard">数据统计</span>
+      </div>
+      <div class="sidebar-item" data-page="tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        <span data-i18n="nav.tools">工具箱</span>
       </div>
       <div class="sidebar-divider"></div>
       <div class="sidebar-group-label" data-i18n="nav.system">系统</div>
@@ -85,19 +126,14 @@
     </div>
   </div>
 
+  <!-- 内容区域 -->
   <div class="content">
 
-    <!-- Install page -->
+    <!-- 安装页 -->
+    <!-- 提供搜索框、拖拽区、安装选项和进度卡片 -->
     <div class="page active" id="page-install">
       <div class="page-header" data-i18n="install.title">安装库</div>
       <div class="page-desc" data-i18n="install.desc">搜索、安装 Python 库，支持拖拽批量安装</div>
-
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-label" data-i18n="stat.installed">已安装</div><div class="stat-value" id="stat-installed">0</div></div>
-        <div class="stat-card"><div class="stat-label" data-i18n="stat.updates">有更新</div><div class="stat-value warn" id="stat-updates">0</div></div>
-        <div class="stat-card"><div class="stat-label" data-i18n="stat.today">今日安装</div><div class="stat-value ok" id="stat-today">0</div></div>
-        <div class="stat-card"><div class="stat-label" data-i18n="stat.mirrors">镜像源</div><div class="stat-value accent" id="stat-mirrors">0</div></div>
-      </div>
 
       <div class="search-bar">
         <input class="search-input" type="text" id="install-search" data-i18n-placeholder="install.search" placeholder="输入需要安装库的名称，多个库以空格间隔开" onkeydown="if(event.key==='Enter')startInstall()">
@@ -135,6 +171,28 @@
         </div>
       </div>
 
+      <div class="card">
+        <div class="card-title-sm" data-i18n="settings.advanced">高级</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.threads">并行安装线程数</div>
+            <div class="setting-desc" data-i18n="settings.threadsDesc">多线程并行安装多个库，大幅提升效率</div>
+          </div>
+          <select id="setting-threads" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
+            <option>2</option><option selected>4</option><option>8</option><option>16</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.retry">智能重试次数</div>
+            <div class="setting-desc" data-i18n="settings.retryDesc">如果这个镜像源无法安装就换一个镜像源再安装</div>
+          </div>
+          <select id="setting-retry" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
+            <option>1</option><option selected>3</option><option>5</option>
+          </select>
+        </div>
+      </div>
+
       <div id="install-progress" style="display:none;">
         <div class="card">
           <div class="card-title-sm" data-i18n="install.progress">安装进度</div>
@@ -154,11 +212,10 @@
           </div>
         </div>
       </div>
-
-      <div id="install-log" class="install-log" style="display:none;"></div>
     </div>
 
-    <!-- Uninstall page -->
+    <!-- 卸载页 -->
+    <!-- 提供搜索、批量选择、卸载选项和已安装包列表 -->
     <div class="page" id="page-uninstall">
       <div class="page-header" data-i18n="uninstall.title">卸载库</div>
       <div class="page-desc" data-i18n="uninstall.desc">安全地卸载不需要的 Python 库</div>
@@ -204,7 +261,8 @@
       </div>
     </div>
 
-    <!-- Update page -->
+    <!-- 更新页 -->
+    <!-- 提供更新选项、搜索、可更新包列表和进度卡片 -->
     <div class="page" id="page-update">
       <div class="page-header" data-i18n="update.title">更新库</div>
       <div class="page-desc" data-i18n="update.desc">检查并安装可用的库更新</div>
@@ -270,10 +328,52 @@
         </div>
       </div>
 
-      <div id="update-log" class="install-log" style="display:none;"></div>
+      <!-- 定时自动更新 -->
+      <div class="card">
+        <div class="card-title-sm" data-i18n="scheduler.title">定时自动更新</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="scheduler.enable">启用定时更新</div>
+            <div class="setting-desc" data-i18n="scheduler.enableDesc">后台自动检查并更新所有包，结果写入操作日志</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-scheduler" onchange="toggleScheduler()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="scheduler.frequency">执行频率</div>
+            <div class="setting-desc" data-i18n="scheduler.frequencyDesc">设定自动更新的执行周期</div>
+          </div>
+          <select id="scheduler-frequency" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;" onchange="changeSchedulerFrequency()">
+            <option value="daily" data-i18n="scheduler.daily">每天</option>
+            <option value="weekly" data-i18n="scheduler.weekly">每周</option>
+          </select>
+        </div>
+        <div class="setting-row" style="align-items:flex-start;">
+          <div style="flex:1;">
+            <div class="setting-label" data-i18n="scheduler.whitelist">更新白名单</div>
+            <div class="setting-desc" data-i18n="scheduler.whitelistDesc">白名单内的包不会被自动更新，多个包名用逗号分隔</div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+              <input type="text" id="scheduler-whitelist-input" class="search-input" style="flex:1; padding:8px 12px; font-size:12px;" data-i18n-placeholder="scheduler.whitelistHint" placeholder="例如: numpy, pandas, torch" onkeydown="if(event.key==='Enter')addWhitelistPkg()">
+              <button class="btn btn-sm" onclick="addWhitelistPkg()" data-i18n="btn.add">添加</button>
+            </div>
+            <div id="scheduler-whitelist-tags" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;"></div>
+          </div>
+        </div>
+        <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
+          <div>
+            <div class="setting-label" data-i18n="scheduler.lastRun">上次执行</div>
+            <div class="setting-desc" id="scheduler-last-run" style="font-family:monospace; font-size:11px;">-</div>
+          </div>
+          <button class="btn btn-sm btn-primary" id="btn-run-scheduler" onclick="runSchedulerNow()"><span class="spinner"></span><span data-i18n="scheduler.runNow">立即执行</span></button>
+        </div>
+      </div>
     </div>
 
-    <!-- Query page -->
+    <!-- 查询页 -->
+    <!-- 提供搜索、状态筛选、排序和已安装包查询表格 -->
     <div class="page" id="page-query">
       <div class="page-header" data-i18n="query.title">查询库</div>
       <div class="page-desc" data-i18n="query.desc">按多种条件筛选和搜索已安装的库</div>
@@ -316,14 +416,58 @@
       </div>
     </div>
 
-    <!-- Mirror page -->
+    <!-- 项目模板页 -->
+    <!-- 提供预设模板一键创建环境、环境快照与时间旅行回滚 -->
+    <div class="page" id="page-templates">
+      <div class="page-header" data-i18n="tpl.title">项目模板</div>
+      <div class="page-desc" data-i18n="tpl.desc">一键创建开发环境，管理环境快照与回滚</div>
+
+      <!-- 预设模板 -->
+      <div class="card">
+        <div class="card-title-sm" data-i18n="tpl.presets">预设模板</div>
+        <div class="setting-desc" style="margin-bottom:14px;" data-i18n="tpl.presetsDesc">选择模板，一键创建虚拟环境并安装所有依赖包</div>
+        <div id="tpl-grid" class="tpl-grid"></div>
+      </div>
+
+      <!-- 从模板创建 -->
+      <div class="card" id="tpl-create-card" style="display:none;">
+        <div class="card-title-sm" data-i18n="tpl.createFrom">从模板创建环境</div>
+        <div id="tpl-create-info" style="margin-bottom:12px; font-size:13px; color:var(--text-secondary);"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:1; min-width:140px;">
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="tpl.venvName">环境名称</label>
+            <input type="text" id="tpl-venv-name" class="search-input" style="width:100%;" placeholder="my-project">
+          </div>
+          <div style="flex:1; min-width:160px;">
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="tpl.basePython">基础 Python</label>
+            <select id="tpl-base-python" class="search-input" style="width:100%;"></select>
+          </div>
+          <button class="btn btn-sm btn-primary" id="btn-tpl-create" onclick="execTemplateCreate()"><span class="spinner"></span><span data-i18n="tpl.createBtn">创建并安装</span></button>
+          <button class="btn btn-sm" onclick="cancelTemplateSelect()" data-i18n="btn.cancel">取消</button>
+        </div>
+      </div>
+
+      <!-- 环境快照 -->
+      <div class="card">
+        <div class="card-title-sm" data-i18n="tpl.snapshot">环境快照</div>
+        <div class="setting-desc" style="margin-bottom:12px;" data-i18n="tpl.snapshotDesc">记录当前环境的完整状态，支持随时回滚（时间旅行）</div>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px;">
+          <input type="text" id="snapshot-label" class="search-input" style="flex:1;" data-i18n-placeholder="tpl.snapshotHint" placeholder="快照备注（可选），例如: 项目初期状态">
+          <button class="btn btn-sm btn-primary" id="btn-create-snapshot" onclick="createEnvSnapshot()"><span class="spinner"></span><span data-i18n="tpl.snapshotBtn">创建快照</span></button>
+        </div>
+        <div id="snapshot-list"></div>
+      </div>
+    </div>
+
+    <!-- 镜像源页 -->
+    <!-- 提供镜像列表、智能路由、自定义镜像源添加 -->
     <div class="page" id="page-mirror">
       <div class="page-header" data-i18n="mirror.title">镜像源管理</div>
       <div class="page-desc" data-i18n="mirror.desc">管理 PyPI 镜像源，自动选择最优线路</div>
 
       <div class="card">
-        <div class="card-title-sm" data-i18n="mirror.list">镜像源列表</div>
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div class="card-title-sm" data-i18n="mirror.list" style="margin-bottom:0;">镜像源列表</div>
           <button class="btn btn-sm" id="btn-test-speed" onclick="testAllMirrors()"><span class="spinner"></span><span data-i18n="btn.testSpeed">全部测速</span></button>
         </div>
         <div id="mirror-list"></div>
@@ -351,9 +495,18 @@
           <button class="btn btn-sm btn-primary" onclick="addCustomMirror()" data-i18n="btn.add">添加</button>
         </div>
       </div>
+
+      <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div class="card-title-sm" style="margin-bottom:0;" data-i18n="settings.mirrors">镜像源</div>
+          <button class="btn btn-sm" onclick="restoreDefaultMirrorsSettings()" data-i18n="btn.restore">恢复默认</button>
+        </div>
+        <div class="setting-desc" data-i18n="settings.restoreMirrorsDesc">重置内置镜像源并保留自定义镜像源</div>
+      </div>
     </div>
 
-    <!-- Env page -->
+    <!-- 环境页 -->
+    <!-- 显示检测到的 Python 环境列表，支持切换 -->
     <div class="page" id="page-env">
       <div class="page-header" data-i18n="env.title">环境选择</div>
       <div class="page-desc" data-i18n="env.desc">选择要操作的 Python 环境</div>
@@ -362,9 +515,111 @@
         <div class="card-title-sm" data-i18n="env.pythonEnv">Python 环境</div>
         <div id="env-list"></div>
       </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="env.repairPip">修复 pip</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+          <div class="setting-desc" data-i18n="env.repairPipDesc" style="margin:0;">如果 pip 被意外卸载或损坏，可使用 ensurepip 重新引导安装</div>
+          <button class="btn btn-sm btn-primary" id="btn-repair-pip" onclick="repairPip()" data-i18n="env.repairPipBtn" style="flex-shrink:0; margin-left:16px;">修复 pip</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-sm" data-i18n="env.venv">虚拟环境</div>
+        <div class="setting-desc" data-i18n="env.venvDesc">创建和管理 Python 虚拟环境（venv），隔离不同项目的依赖</div>
+
+        <!-- 创建虚拟环境表单 -->
+        <div class="venv-create-form" style="margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
+          <div style="flex:1; min-width:140px;">
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="env.venvName">环境名称</label>
+            <input type="text" id="venv-name" class="search-input" data-i18n-placeholder="env.venvNameHint" placeholder="例如: my-project" style="width:100%;">
+          </div>
+          <div style="flex:1; min-width:160px;">
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="env.venvBase">基础 Python</label>
+            <select id="venv-base-python" class="search-input" style="width:100%;"></select>
+          </div>
+          <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="venv-with-pip" checked> <span data-i18n="env.venvWithPip">包含 pip</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="venv-system-site"> <span data-i18n="env.venvSystemSite">继承系统 site-packages</span>
+          </label>
+          <button class="btn btn-sm btn-primary" id="btn-create-venv" onclick="createVenv()" data-i18n="env.venvCreateBtn">创建</button>
+        </div>
+
+        <!-- 虚拟环境列表 -->
+        <div id="venv-list" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- 导出/导入环境 -->
+      <div class="card">
+        <div class="card-title-sm" data-i18n="env.export">导出环境</div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="setting-desc" data-i18n="env.exportDesc" style="margin:0;">将当前环境的所有包导出为 requirements.txt</div>
+          <button class="btn btn-sm btn-primary" onclick="exportEnv()" style="flex-shrink:0; margin-left:16px;" data-i18n="env.exportBtn">导出</button>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding-top:14px; border-top:1px solid var(--border-light);">
+          <div>
+            <div class="setting-label" data-i18n="env.import">导入环境</div>
+            <div class="setting-desc" data-i18n="env.importDesc" style="margin:0;">从 requirements.txt 文件安装包到当前环境</div>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="importEnv()" style="flex-shrink:0; margin-left:16px;" data-i18n="env.importBtn">导入</button>
+        </div>
+      </div>
+
+      <!-- 环境对比 -->
+      <div class="card">
+        <div class="card-title-sm" data-i18n="env.compare">环境对比</div>
+        <div class="setting-desc" data-i18n="env.compareDesc" style="margin-bottom:12px;">对比两个环境的包差异</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <select id="compare-env-a" class="search-input" style="flex:1; min-width:140px;"></select>
+          <span style="color:var(--text-muted); font-weight:600;">VS</span>
+          <select id="compare-env-b" class="search-input" style="flex:1; min-width:140px;"></select>
+          <button class="btn btn-sm btn-primary" id="btn-compare-envs" onclick="compareEnvs()" data-i18n="env.compareBtn">对比</button>
+        </div>
+        <div id="compare-result" style="margin-top:14px; display:none;"></div>
+      </div>
     </div>
 
-    <!-- Logs page -->
+    <!-- PyPI 浏览页 -->
+    <!-- 内嵌 PyPI 搜索界面，调用 PyPI JSON API，支持查看 README 后一键安装 -->
+    <div class="page" id="page-pypi">
+      <div class="page-header" data-i18n="pypi.title">PyPI 浏览</div>
+      <div class="page-desc" data-i18n="pypi.desc">搜索 PyPI 包，查看详情并一键安装</div>
+
+      <div class="search-bar">
+        <input class="search-input" type="text" id="pypi-search" data-i18n-placeholder="pypi.searchHint" placeholder="输入包名搜索 PyPI..." onkeydown="if(event.key==='Enter')searchPyPI()">
+        <button class="btn btn-primary" id="btn-pypi-search" onclick="searchPyPI()"><span class="spinner"></span><span data-i18n="pypi.searchBtn">搜索</span></button>
+      </div>
+
+      <!-- 搜索结果列表 -->
+      <div id="pypi-results"></div>
+
+      <!-- 包详情面板 -->
+      <div id="pypi-detail" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+            <div>
+              <div style="font-size:18px; font-weight:700; color:var(--text-primary);" id="pypi-detail-name"></div>
+              <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;" id="pypi-detail-summary"></div>
+            </div>
+            <button class="btn btn-sm" onclick="closePypiDetail()" style="flex-shrink:0;">← <span data-i18n="pypi.back">返回列表</span></button>
+          </div>
+          <div class="pypi-meta-row" id="pypi-detail-meta"></div>
+          <div style="margin-top:14px; display:flex; gap:10px;">
+            <button class="btn btn-sm btn-primary" id="btn-pypi-install" onclick="installFromPypi()"><span class="spinner"></span><span data-i18n="pypi.installBtn">一键安装</span></button>
+            <a id="pypi-detail-link" href="#" target="_blank" class="btn btn-sm" data-i18n="pypi.viewPyPI">在 PyPI 查看</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title-sm">README</div>
+          <div id="pypi-detail-readme" class="pypi-readme"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日志页 -->
+    <!-- 提供类型筛选、搜索和日志列表 -->
     <div class="page" id="page-logs">
       <div class="page-header" data-i18n="logs.title">操作日志</div>
       <div class="page-desc" data-i18n="logs.desc">查看所有安装、卸载和更新操作的记录</div>
@@ -377,6 +632,8 @@
           <option value="update" data-i18n="logs.update">更新</option>
         </select>
         <input class="search-input" type="text" id="log-search" data-i18n-placeholder="logs.search" placeholder="搜索日志..." style="flex:1; min-width:160px;">
+        <button class="btn btn-sm" onclick="exportLogs('csv')" data-i18n="logs.exportCsv">导出 CSV</button>
+        <button class="btn btn-sm" onclick="exportLogs('md')" data-i18n="logs.exportMd">导出 Markdown</button>
         <button class="btn btn-sm" onclick="clearLogs()" data-i18n="btn.clearLogs">清空日志</button>
       </div>
 
@@ -387,7 +644,219 @@
       </div>
     </div>
 
-    <!-- Settings page -->
+    <!-- 数据统计页 -->
+    <!-- 独立的操作统计仪表盘，展示操作概览、趋势图、Top包、最近活动 -->
+    <div class="page" id="page-dashboard">
+      <div class="page-header" data-i18n="dashboard.title">数据统计</div>
+      <div class="page-desc" data-i18n="dashboard.desc">查看包管理操作的综合统计分析</div>
+
+      <!-- 概览卡片 -->
+      <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.installed">已安装</div><div class="stat-value" id="stat-installed">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.updates">有更新</div><div class="stat-value warn" id="stat-updates">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.today">今日安装</div><div class="stat-value ok" id="stat-today">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.mirrors">镜像源</div><div class="stat-value accent" id="stat-mirrors">0</div></div>
+      </div>
+
+      <!-- 操作统计卡片 -->
+      <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card"><div class="stat-label" data-i18n="dashboard.totalInstall">总安装</div><div class="stat-value ok" id="db-total-install">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="dashboard.totalUninstall">总卸载</div><div class="stat-value" id="db-total-uninstall" style="color:var(--tag-danger-text)">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="dashboard.totalUpdate">总更新</div><div class="stat-value accent" id="db-total-update">0</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="dashboard.successRate">成功率</div><div class="stat-value" id="db-success-rate" style="color:var(--tag-ok-text)">0%</div></div>
+      </div>
+
+      <!-- 本周活动 + 最近活动 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div class="card">
+          <div class="card-title-sm" data-i18n="dashboard.weekActivity">本周活动</div>
+          <div class="db-week-grid">
+            <div class="db-week-item"><span class="db-week-num ok" id="db-week-install">0</span><span class="db-week-label" data-i18n="stats.weekInstall">本周安装</span></div>
+            <div class="db-week-item"><span class="db-week-num danger" id="db-week-uninstall">0</span><span class="db-week-label" data-i18n="stats.weekUninstall">本周卸载</span></div>
+            <div class="db-week-item"><span class="db-week-num accent" id="db-week-update">0</span><span class="db-week-label" data-i18n="stats.weekUpdate">本周更新</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title-sm" data-i18n="dashboard.recentActivity">最近活动</div>
+          <div id="db-recent-activity" class="db-activity-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 工具箱页 -->
+    <div class="page" id="page-tools">
+      <div class="page-header" data-i18n="tools.title">工具箱</div>
+      <div class="page-desc" data-i18n="tools.desc">依赖图谱、空间分析、环境对比、离线下载等高级功能</div>
+
+      <!-- Tab 切换 -->
+      <div class="tools-tabs">
+        <div class="tools-tab active" data-tool="depGraph" data-i18n="tools.tab.depGraph">依赖图谱</div>
+        <div class="tools-tab" data-tool="diagnostics" data-i18n="tools.tab.diagnostics">环境诊断</div>
+        <div class="tools-tab" data-tool="diskUsage" data-i18n="tools.tab.diskUsage">空间分析</div>
+        <div class="tools-tab" data-tool="diff" data-i18n="tools.tab.diff">环境对比</div>
+        <div class="tools-tab" data-tool="offline" data-i18n="tools.tab.offline">离线下载</div>
+      </div>
+
+      <!-- 依赖图谱 -->
+      <div class="tool-panel active" id="tool-depGraph">
+        <div class="card">
+          <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap;">
+            <div class="theme-options" id="dep-mode-options">
+              <div class="theme-opt active" data-dep-mode="single" data-i18n="dep.mode.single">单包依赖树</div>
+              <div class="theme-opt" data-dep-mode="global" data-i18n="dep.mode.global">全局依赖网络</div>
+            </div>
+            <div id="dep-single-input" style="display:flex; gap:8px; flex:1; min-width:200px;">
+              <input class="search-input" type="text" id="dep-pkg-name" data-i18n-placeholder="dep.inputHint" placeholder="输入包名查看依赖树..." style="flex:1;" onkeydown="if(event.key==='Enter')loadDepGraph()">
+              <button class="btn btn-sm btn-primary" id="btn-dep-load" onclick="loadDepGraph()"><span class="spinner"></span><span data-i18n="dep.loadBtn">加载</span></button>
+            </div>
+          </div>
+          <div id="dep-info" style="font-size:12px; color:var(--text-muted); margin-bottom:10px;"></div>
+          <div class="dep-canvas-wrap">
+            <canvas id="dep-canvas" width="800" height="500"></canvas>
+            <div class="dep-empty" id="dep-empty" data-i18n="dep.empty">输入包名或切换到全局模式</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 环境诊断 -->
+      <div class="tool-panel" id="tool-diagnostics">
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div class="card-title-sm" style="margin-bottom:0;" data-i18n="diag.title">环境健康诊断</div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-sm" id="btn-check-conflicts" onclick="runConflictCheck()"><span class="spinner"></span><span data-i18n="diag.conflictBtn">依赖冲突检测</span></button>
+              <button class="btn btn-sm btn-primary" id="btn-health-check" onclick="runHealthCheck()"><span class="spinner"></span><span data-i18n="diag.healthBtn">全面健康检查</span></button>
+            </div>
+          </div>
+          <div class="setting-desc" style="margin-bottom:14px;" data-i18n="diag.desc">检测依赖冲突、损坏的包、缺失的元数据等问题，并给出健康评分</div>
+          <!-- 健康评分 -->
+          <div id="diag-score" style="display:none; margin-bottom:16px; text-align:center;">
+            <div id="diag-score-value" style="font-size:42px; font-weight:800; line-height:1;"></div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;" data-i18n="diag.scoreLabel">健康评分</div>
+          </div>
+          <!-- 概览统计 -->
+          <div id="diag-stats" style="display:none; margin-bottom:14px; display:flex; gap:12px; flex-wrap:wrap;"></div>
+          <!-- 结果列表 -->
+          <div id="diag-results"></div>
+          <div class="empty-state" id="diag-empty">
+            <div class="empty-state-text" data-i18n="diag.empty">点击“依赖冲突检测”或“全面健康检查”开始诊断</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div class="card-title-sm" style="margin-bottom:0;" data-i18n="audit.title">安全漏洞扫描</div>
+            <button class="btn btn-sm btn-primary" id="btn-run-audit" onclick="runSecurityAudit()"><span class="spinner"></span><span data-i18n="audit.scanBtn">扫描漏洞</span></button>
+          </div>
+          <div class="setting-desc" style="margin-bottom:12px;" data-i18n="audit.desc">基于 pip-audit 和 PyPI Advisory Database 扫描已安装包的已知 CVE 漏洞</div>
+          <div id="audit-summary" style="display:none; margin-bottom:12px;"></div>
+          <div id="audit-results"></div>
+        </div>
+      </div>
+
+      <!-- 磁盘空间分析 -->
+      <div class="tool-panel" id="tool-diskUsage">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <span style="font-size:13px; color:var(--text-secondary);" data-i18n="disk.total">总占用</span>
+              <span id="disk-total" style="font-size:18px; font-weight:700; margin-left:8px; color:var(--text-primary);">-</span>
+            </div>
+            <button class="btn btn-sm btn-primary" id="btn-disk-scan" onclick="loadDiskUsage()"><span class="spinner"></span><span data-i18n="tools.tab.diskUsage">分析</span></button>
+          </div>
+          <div id="disk-path" style="font-size:11px; color:var(--text-muted); margin-bottom:14px; word-break:break-all;"></div>
+          <div id="disk-chart"></div>
+          <div class="empty-state" id="disk-empty" style="display:none;">
+            <div class="empty-state-text" data-i18n="disk.empty">暂无数据，请先选择一个 Python 环境</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 环境对比 -->
+      <div class="tool-panel" id="tool-diff">
+        <div class="card">
+          <div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; margin-bottom:14px;">
+            <div style="flex:1; min-width:180px;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="diff.sourceA">来源 A</label>
+              <div style="display:flex; gap:6px;">
+                <select id="diff-type-a" class="search-input" style="flex:1;" onchange="onDiffTypeChange('a')">
+                  <option value="env" data-i18n="diff.currentEnv">当前环境</option>
+                  <option value="file" data-i18n="diff.selectFile">选择文件...</option>
+                </select>
+              </div>
+              <div id="diff-file-a" style="display:none; margin-top:6px;">
+                <button class="btn btn-sm" onclick="browseDiffFile('a')" data-i18n="offline.browse">浏览...</button>
+                <span id="diff-file-a-name" style="font-size:11px; color:var(--text-muted); margin-left:6px;"></span>
+              </div>
+            </div>
+            <div style="flex:1; min-width:180px;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="diff.sourceB">来源 B</label>
+              <div style="display:flex; gap:6px;">
+                <select id="diff-type-b" class="search-input" style="flex:1;" onchange="onDiffTypeChange('b')">
+                  <option value="file" data-i18n="diff.selectFile">选择文件...</option>
+                  <option value="env" data-i18n="diff.currentEnv">当前环境</option>
+                </select>
+              </div>
+              <div id="diff-file-b" style="margin-top:6px;">
+                <button class="btn btn-sm" onclick="browseDiffFile('b')" data-i18n="offline.browse">浏览...</button>
+                <span id="diff-file-b-name" style="font-size:11px; color:var(--text-muted); margin-left:6px;"></span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-primary" id="btn-diff-run" onclick="runDiff()"><span class="spinner"></span><span data-i18n="diff.compareBtn">开始对比</span></button>
+          </div>
+          <div id="diff-stats" style="display:none; margin-bottom:12px; font-size:13px;"></div>
+          <div id="diff-results"></div>
+          <div class="empty-state" id="diff-empty">
+            <div class="empty-state-text" data-i18n="diff.empty">选择两个来源进行对比</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 离线下载 -->
+      <div class="tool-panel" id="tool-offline">
+        <div class="card">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="offline.packages">包名列表</label>
+            <input class="search-input" type="text" id="offline-packages" data-i18n-placeholder="offline.packagesHint" placeholder="输入包名，空格分隔，例如: numpy pandas requests" style="width:100%;">
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:14px;">
+            <div style="flex:1; min-width:200px;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="offline.destDir">目标目录</label>
+              <div style="display:flex; gap:6px;">
+                <input class="search-input" type="text" id="offline-dest" readonly style="flex:1;" placeholder="C:\\Users\\...\\downloads">
+                <button class="btn btn-sm" onclick="browseOfflineDest()" data-i18n="offline.browse">浏览...</button>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="offline.platform">目标平台</label>
+              <select id="offline-platform" class="search-input">
+                <option value="any" data-i18n="offline.platformAny">通用 (any)</option>
+                <option value="win_amd64" data-i18n="offline.platformWin">Windows (win_amd64)</option>
+                <option value="manylinux2014_x86_64" data-i18n="offline.platformLinux">Linux (manylinux)</option>
+              </select>
+            </div>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding-bottom:8px;">
+              <input type="checkbox" id="offline-deps" checked> <span data-i18n="offline.includeDeps">包含依赖包</span>
+            </label>
+          </div>
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" id="btn-offline-download" onclick="startOfflineDownload()"><span class="spinner"></span><span data-i18n="offline.downloadBtn">开始下载</span></button>
+          </div>
+          <div id="offline-progress" style="display:none; margin-top:14px;">
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label" id="offline-progress-label">...</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="offline-progress-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div id="offline-result" style="display:none; margin-top:14px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置页 -->
+    <!-- 提供主题、语言、存储路径、线程数、重试次数等配置 -->
     <div class="page" id="page-settings">
       <div class="page-header" data-i18n="settings.title">设置</div>
       <div class="page-desc" data-i18n="settings.desc">自定义 PyLibMaster 的外观和行为</div>
@@ -402,6 +871,7 @@
           <div class="theme-options" id="theme-options">
             <div class="theme-opt active" data-theme="light" data-i18n="theme.light">浅色</div>
             <div class="theme-opt" data-theme="dark" data-i18n="theme.dark">深色</div>
+            <div class="theme-opt" data-theme="system" data-i18n="theme.system">跟随系统</div>
           </div>
         </div>
         <div class="setting-row">
@@ -421,7 +891,7 @@
         <div class="setting-row" style="align-items:flex-start;">
           <div>
             <div class="setting-label" data-i18n="settings.path">库安装路径</div>
-            <div class="setting-desc" data-i18n="settings.pathDesc">路径默认保存在文档文件夹中的Python库安装里面</div>
+            <div class="setting-desc" data-i18n="settings.pathDesc">路径默认保存在软件安装目录的log文件夹中</div>
             <div id="setting-path" style="margin-top:6px; font-family:monospace; font-size:11px; color:var(--text-secondary); word-break:break-all;"></div>
           </div>
           <button class="btn btn-sm" onclick="browseStoragePath()" data-i18n="btn.browse">浏览...</button>
@@ -429,44 +899,51 @@
       </div>
 
       <div class="card">
-        <div class="card-title-sm" data-i18n="settings.mirrors">镜像源</div>
+        <div class="card-title-sm" data-i18n="settings.notifications">通知</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="settings.desktopNotify">桌面通知</div>
+            <div class="setting-desc" data-i18n="settings.desktopNotifyDesc">操作完成后发送系统通知</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-notify" checked onchange="toggleDesktopNotify()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
         <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
           <div>
-            <div class="setting-label" data-i18n="settings.restoreMirrors">恢复默认镜像源</div>
-            <div class="setting-desc" data-i18n="settings.restoreMirrorsDesc">重置内置镜像源并保留自定义镜像源</div>
+            <div class="setting-label" data-i18n="settings.tray">系统托盘</div>
+            <div class="setting-desc" data-i18n="settings.trayDesc">关闭窗口时最小化到系统托盘</div>
           </div>
-          <button class="btn btn-sm" onclick="restoreDefaultMirrorsSettings()" data-i18n="btn.restore">恢复默认</button>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-tray" checked onchange="toggleTrayMinimize()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
         </div>
       </div>
 
+      <!-- 系统集成 -->
       <div class="card">
-        <div class="card-title-sm" data-i18n="settings.advanced">高级</div>
-        <div class="setting-row">
+        <div class="card-title-sm" data-i18n="settings.integration">系统集成</div>
+        <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
           <div>
-            <div class="setting-label" data-i18n="settings.threads">并行安装线程数</div>
-            <div class="setting-desc" data-i18n="settings.threadsDesc">多线程并行安装多个库，大幅提升效率</div>
+            <div class="setting-label" data-i18n="settings.contextMenu">资源管理器右键菜单</div>
+            <div class="setting-desc" data-i18n="settings.contextMenuDesc">在文件夹右键菜单中添加 PyLibMaster 快捷操作</div>
           </div>
-          <select id="setting-threads" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
-            <option>2</option><option selected>4</option><option>8</option><option>16</option>
-          </select>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label" data-i18n="settings.retry">智能重试次数</div>
-            <div class="setting-desc" data-i18n="settings.retryDesc">如果这个镜像源无法安装就换一个镜像源再安装</div>
-          </div>
-          <select id="setting-retry" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-primary); font-size:12px; outline:none; cursor:pointer;">
-            <option>1</option><option selected>3</option><option>5</option>
-          </select>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-context-menu" onchange="toggleContextMenu()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
         </div>
       </div>
     </div>
 
-    <!-- About page -->
+    <!-- 关于页 -->
+    <!-- 显示应用信息、版本、更新检查和项目介绍 -->
     <div class="page" id="page-about">
       <div class="about-center">
         <div class="about-icon">
-          <img src="logo.png" alt="PyLibMaster" class="about-logo-img">
+          <img src="assets/logo.png" alt="PyLibMaster" class="about-logo-img">
         </div>
         <div class="about-name">PyLibMaster</div>
         <div class="about-ver">v0.1.0-alpha</div>
@@ -482,7 +959,15 @@
         </div>
         <div class="about-info">
           <span data-i18n="about.author">作者</span>: SoftheartedYYC<br>
-          <span data-i18n="about.contact">联系方式</span>: <a href="mailto:1247449619@qq.com">1247449619@qq.com</a>
+          <span data-i18n="about.contact">联系方式</span>: <a href="mailto:softheartedyyc@gmail.com">softheartedyyc@gmail.com</a><br>
+          <span data-i18n="about.github">项目地址</span>: <a href="https://github.com/SoftheartedYYC/PyLibMaster" target="_blank" rel="noopener">github.com/SoftheartedYYC/PyLibMaster</a>
+        </div>
+
+        <div class="about-intro" data-i18n="about.intro">PyLibMaster 是一款基于 Electron 的 Python 库图形化管理工具，提供库的安装、卸载、更新、查询，多环境切换、镜像源管理与备份回滚等功能，让 Python 第三方库的管理更加简单高效。</div>
+
+        <div class="about-notice">
+          <strong data-i18n="about.noticeTitle">使用声明</strong>
+          <span data-i18n="about.noticeText">本软件为免费开源工具，仅供个人学习与研究使用，不得用于任何商业用途，禁止以任何形式进行收费或变相收费。</span>
         </div>
       </div>
     </div>
@@ -490,6 +975,7 @@
   </div>
 </div>
 
+<!-- 底部状态栏 -->
 <div class="statusbar">
   <div class="statusbar-item">
     <div class="statusbar-dot"></div>
@@ -504,6 +990,7 @@
   </div>
 </div>
 
+<!-- 备份确认模态对话框 -->
 <div class="modal-overlay" id="backup-modal">
   <div class="modal">
     <div class="modal-title" data-i18n="modal.title">创建卸载备份</div>
@@ -516,8 +1003,29 @@
   </div>
 </div>
 
+<!-- 包详情模态对话框 -->
+<div class="modal-overlay" id="pkg-detail-modal">
+  <div class="modal" style="width:560px; max-height:80vh; overflow-y:auto;">
+    <div class="modal-title" id="pkg-detail-title" data-i18n="detail.title">包详情</div>
+    <div id="pkg-detail-content">
+      <div style="text-align:center; padding:20px; color:var(--text-muted);" data-i18n="detail.loading">加载中...</div>
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn" onclick="closeModal('pkg-detail-modal')" data-i18n="btn.cancel">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 提示容器（动态插入提示元素） -->
 <div class="toast-container" id="toast-container"></div>
 
-<script src="app.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/core.js"></script>
+<script src="js/render.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/operations.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
