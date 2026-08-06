@@ -484,10 +484,12 @@ ipcMain.handle('config:setBulk', (event, updates) => configManager.setBulk(updat
 
 // ============ IPC 处理器：自动更新 ============
 
-// 检查是否有新版本可用
+// 检查是否有新版本可用（双源：GitHub + Gitee，自动测速选源）
 ipcMain.handle('updater:check', async () => updater.checkForUpdates());
 // 退出应用并安装已下载的更新
 ipcMain.handle('updater:install', () => updater.quitAndInstall());
+// 获取当前生效的下载源（github/gitee）
+ipcMain.handle('updater:getSource', () => updater.getActiveSource());
 
 // ============ IPC 处理器：系统功能 ============
 

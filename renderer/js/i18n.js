@@ -80,6 +80,10 @@ window.I18N = {
     'update.notAvailable': '当前已是最新版本',
     'update.downloading': '正在下载更新... {percent}%',
     'update.downloaded': '新版本 {version} 已下载，点击立即安装',
+    'update.speedTesting': '正在测速更新源（GitHub / Gitee）...',
+    'update.sourceSelected': '已选择更快的更新源：{source}',
+    'update.source.github': 'GitHub',
+    'update.source.gitee': 'Gitee（国内加速）',
     'update.error': '检查更新失败',
     'update.errorPrefix': '检查更新失败: ',
     // 包详情面板
@@ -260,6 +264,10 @@ window.I18N = {
     'update.notAvailable': 'You are up to date',
     'update.downloading': 'Downloading update... {percent}%',
     'update.downloaded': 'New version {version} downloaded, click to install',
+    'update.speedTesting': 'Testing update sources (GitHub / Gitee)...',
+    'update.sourceSelected': 'Faster source selected: {source}',
+    'update.source.github': 'GitHub',
+    'update.source.gitee': 'Gitee (CN mirror)',
     'update.error': 'Update check failed',
     'update.errorPrefix': 'Update check failed: ',
     // Package detail panel

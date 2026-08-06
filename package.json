@@ -1,6 +1,6 @@
 {
   "name": "pylibmaster",
-  "version": "1.5.30",
+  "version": "1.5.31",
   "description": "Python 库管理工具",
   "main": "main.js",
   "author": "SoftheartedYYC",
@@ -11,7 +11,8 @@
     "test": "node --require ./tests/bootstrap.js --test tests/**/*.test.js",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
-    "dist": "npm run build:win"
+    "dist": "npm run build:win",
+    "publish:gitee": "node scripts/publish-gitee.js"
   },
   "devDependencies": {
     "electron": "31.7.7",

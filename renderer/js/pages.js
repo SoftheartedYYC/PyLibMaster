@@ -488,6 +488,17 @@ function bindUpdaterEvents() {
     setUpdateStatus(t('update.checking'));
   });
 
+  // 正在对 GitHub / Gitee 两源测速
+  api.onUpdaterSpeedTesting(() => {
+    setUpdateStatus(t('update.speedTesting'));
+  });
+
+  // 测速完成，已选定更快的下载源
+  api.onUpdaterSourceSelected((data) => {
+    const sourceName = t(`update.source.${data.source}`) || data.source;
+    setUpdateStatus(t('update.sourceSelected').replace('{source}', sourceName));
+  });
+
   api.onUpdaterAvailable((info) => {
     setUpdateStatus(t('update.available').replace('{version}', info.version));
   });

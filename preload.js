@@ -187,10 +187,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 监听应用更新的各个阶段事件
   checkForUpdates: () => ipcRenderer.invoke('updater:check'),
   installUpdate: () => ipcRenderer.invoke('updater:install'),
+  // 获取当前生效的更新下载源（github/gitee）
+  getUpdateSource: () => ipcRenderer.invoke('updater:getSource'),
   // 正在检查更新
   onUpdaterChecking: (callback) => {
     ipcRenderer.removeAllListeners('updater:checking');
     ipcRenderer.on('updater:checking', () => callback());
+  },
+  // 正在对两个更新源测速
+  onUpdaterSpeedTesting: (callback) => {
+    ipcRenderer.removeAllListeners('updater:speed-testing');
+    ipcRenderer.on('updater:speed-testing', (event, data) => callback(data));
+  },
+  // 测速完成，已选定下载源
+  onUpdaterSourceSelected: (callback) => {
+    ipcRenderer.removeAllListeners('updater:source-selected');
+    ipcRenderer.on('updater:source-selected', (event, data) => callback(data));
   },
   // 发现新版本可用
   onUpdaterAvailable: (callback) => {
