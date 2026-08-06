@@ -220,7 +220,7 @@ async function updateAll() {
  * 检查更新（从 PyPI 拉取最新可更新列表）
  */
 async function checkUpdates() {
-  const btn = document.getElementById('btn-check-update');
+  const btn = document.getElementById('btn-check-pkg-update');
   btn.classList.add('loading');
   try {
     updateLibs = await api.listOutdated();

@@ -15,6 +15,11 @@
 const { autoUpdater } = require('electron-updater');
 const logManager = require('./logManager');
 
+// 配置 autoUpdater：发现新版本后自动下载安装包
+autoUpdater.autoDownload = true;          // 自动下载更新
+autoUpdater.autoInstallOnAppQuit = false; // 不自动安装，等待用户确认
+autoUpdater.autoRunAppAfterInstall = true; // 安装后自动启动应用
+
 // 主窗口引用，用于发送更新事件
 let mainWindow = null;
 // 防止重复检查更新的标志
@@ -65,6 +70,17 @@ function initUpdater(win) {
     send('updater:downloaded', info);
     logManager.addLog({ action: 'Update downloaded', status: 'ok', type: 'system', detail: `v${info.version}` });
     checkInProgress = false;
+    // 下载完成后发送系统通知提醒用户安装
+    try {
+      const { Notification } = require('electron');
+      if (Notification.isSupported()) {
+        const notification = new Notification({
+          title: 'PyLibMaster 更新已就绪',
+          body: `v${info.version} 安装包已下载完成，点击应用内“立即安装”按钮即可升级。`
+        });
+        notification.show();
+      }
+    } catch { /* 通知发送失败时静默处理 */ }
   });
 
   // 更新过程中发生错误
