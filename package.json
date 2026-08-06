@@ -45,6 +45,7 @@
     ],
     "win": {
       "icon": "renderer/assets/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
