@@ -37,6 +37,37 @@ function send(channel, data) {
 }
 
 /**
+ * 提取更新信息中的可序列化字段
+ * - 避免将 electron-updater 原始对象（可能含内部引用）直接通过 IPC 传输
+ * @param {Object} info - electron-updater 的 updateInfo 对象
+ * @returns {Object} 纯 JSON 可序列化对象
+ */
+function sanitizeUpdateInfo(info) {
+  if (!info) return {};
+  return {
+    version: info.version || '',
+    releaseDate: info.releaseDate || '',
+    releaseName: info.releaseName || '',
+    releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : ''
+  };
+}
+
+/**
+ * 提取下载进度中的可序列化字段
+ * @param {Object} progress - electron-updater 的 download-progress 对象
+ * @returns {Object} 纯 JSON 可序列化对象
+ */
+function sanitizeProgress(progress) {
+  if (!progress) return { percent: 0 };
+  return {
+    percent: Number(progress.percent) || 0,
+    bytesPerSecond: Number(progress.bytesPerSecond) || 0,
+    transferred: Number(progress.transferred) || 0,
+    total: Number(progress.total) || 0
+  };
+}
+
+/**
  * 初始化更新器，绑定所有更新事件
  * @param {BrowserWindow} win - 主窗口实例
  */
@@ -50,24 +81,24 @@ function initUpdater(win) {
 
   // 发现新版本可用，开始自动下载
   autoUpdater.on('update-available', (info) => {
-    send('updater:available', info);
+    send('updater:available', sanitizeUpdateInfo(info));
     logManager.addLog({ action: 'Update available', status: 'ok', type: 'system', detail: `v${info.version}` });
   });
 
   // 当前已是最新版本，无需更新
   autoUpdater.on('update-not-available', (info) => {
-    send('updater:not-available', info);
+    send('updater:not-available', sanitizeUpdateInfo(info));
     checkInProgress = false;
   });
 
   // 下载进度更新（包含百分比、速度等信息）
   autoUpdater.on('download-progress', (progress) => {
-    send('updater:progress', progress);
+    send('updater:progress', sanitizeProgress(progress));
   });
 
   // 更新包已下载完成，等待用户确认安装
   autoUpdater.on('update-downloaded', (info) => {
-    send('updater:downloaded', info);
+    send('updater:downloaded', sanitizeUpdateInfo(info));
     logManager.addLog({ action: 'Update downloaded', status: 'ok', type: 'system', detail: `v${info.version}` });
     checkInProgress = false;
     // 下载完成后发送系统通知提醒用户安装
@@ -95,6 +126,7 @@ function initUpdater(win) {
  * 检查是否有新版本可用
  * - 防止重复检查（checkInProgress 标志）
  * - 返回纯 JSON 可序列化对象（避免 IPC "object could not be cloned" 错误）
+ * - 异常时抛出纯字符串 Error，避免原始错误对象含不可序列化属性导致 IPC 传输失败
  * @returns {Promise<Object>} 检查结果（仅含可序列化字段）
  */
 async function checkForUpdates() {
@@ -117,7 +149,9 @@ async function checkForUpdates() {
     return { checking: false };
   } catch (err) {
     checkInProgress = false;
-    throw err;
+    // 重要：抛出纯错误消息，避免原始 Error 对象上挂着的不可序列化属性
+    // （如 electron-updater 内部引用）导致 IPC "object could not be cloned" 错误
+    throw new Error(err && err.message ? String(err.message) : '检查更新失败');
   }
 }
 
