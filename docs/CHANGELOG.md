@@ -10,6 +10,61 @@
 
 ---
 
+## [1.5.29] - 2026-08-06
+
+### Bug 修复
+
+- 修复点击"检查更新"时弹出 `An object could not be cloned` 错误：`checkForUpdates` 现在返回纯 JSON 可序列化对象（仅含 version / releaseDate / releaseName / releaseNotes 字段），IPC 传输不再因对象含内部引用而失败。
+
+---
+
+## [1.5.28] - 2026-08-06
+
+### Bug 修复
+
+- 修复查询库页面大量包的安装时间和大小显示为 `-` 的问题：
+  - 根因是包名规范化逻辑不一致（构建映射表时统一用连字符，查询时却转为下划线），导致大部分包在目录映射表中查不到。
+  - 新增 `normalizePkgKey()` 统一规范化（小写 + 连字符），所有查找共用。
+  - `buildPackageDirMap` 改为同时存储包目录（dir）与元数据目录（distInfo），不再互相覆盖。
+  - 安装时间优先使用 `.dist-info` 目录修改时间，更准确反映实际安装时间。
+
+---
+
+## [1.5.27] - 2026-08-06
+
+### 优化
+
+- 优化 Windows 通知显示效果：
+  - 设置 `AppUserModelID`，通知中心不再显示 `electron.app.PyLibMaster` 前缀，统一显示 `PyLibMaster`。
+  - 通知标题改为具体操作描述（安装完成 / 卸载完成 / 更新完成等），不再重复应用名。
+  - 通知风格对齐 QQ 等主流应用。
+
+---
+
+## [1.5.26] - 2026-08-05
+
+### Bug 修复
+
+- 修复自动更新下载 404 错误：electron-builder 生成的 `latest.yml` 与 gh CLI 上传的安装包文件名不一致（空格处理差异）。
+- `package.json` 新增 `artifactName: "${productName}-Setup-${version}.${ext}"`，固化安装包命名为 `PyLibMaster-Setup-x.x.x.exe`，后续发版无需再手动改名。
+
+### 新功能
+
+- 应用启动后自动检查新版本：发现新版本自动下载安装包，下载完成后弹出系统通知提醒用户安装。
+- 修复安装库页面"检查更新"按钮与应用更新按钮的 ID 冲突。
+
+---
+
+## [1.5.25] - 2026-08-05
+
+### Bug 修复
+
+- 修复安装 pip 包时报 `EPERM: operation not permitted, mkdir 'C:\Program Files\PyLibMaster\log'` 的权限错误：
+  - 默认存储路径从安装目录（Program Files）改为用户数据目录（`%APPDATA%\PyLibMaster\storage`），普通用户无需管理员权限即可写入。
+  - 新增智能迁移：检测到旧配置存储路径包含 `Program Files` 时自动切换到新路径并保存。
+
+---
+
 ## [1.5.24] - 2026-08-01
 
 ### Bug 修复
