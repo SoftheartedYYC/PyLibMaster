@@ -97,9 +97,24 @@ describe('buildPackageDirMap', () => {
       fs.mkdirSync(path.join(tmp, 'requests-2.31.0.dist-info'));
       const map = buildPackageDirMap(tmp);
       assert.strictEqual(map.has('numpy'), true);
-      assert.strictEqual(map.get('numpy').type, 'dir');
+      assert.strictEqual(map.get('numpy').dir, path.join(tmp, 'numpy'));
       assert.strictEqual(map.has('requests'), true);
-      assert.strictEqual(map.get('requests').type, 'dist-info');
+      assert.strictEqual(map.get('requests').distInfo, path.join(tmp, 'requests-2.31.0.dist-info'));
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('stores both dir and distInfo for same package', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pip-test-'));
+    try {
+      fs.mkdirSync(path.join(tmp, 'flask'));
+      fs.mkdirSync(path.join(tmp, 'flask-3.0.0.dist-info'));
+      const map = buildPackageDirMap(tmp);
+      assert.strictEqual(map.has('flask'), true);
+      const entry = map.get('flask');
+      assert.strictEqual(entry.dir, path.join(tmp, 'flask'));
+      assert.strictEqual(entry.distInfo, path.join(tmp, 'flask-3.0.0.dist-info'));
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }

@@ -287,10 +287,14 @@ function buildPackageDirMap(sitePackages) {
       if (name.endsWith('.dist-info')) {
         // numpy-1.26.0.dist-info -> numpy
         const pkgName = name.replace(/-\d+(\.\d+)*.*\.dist-info$/, '').replace(/_/g, '-').toLowerCase();
-        map.set(pkgName, { type: 'dist-info', path: fullPath });
+        const existing = map.get(pkgName) || {};
+        existing.distInfo = fullPath;
+        map.set(pkgName, existing);
       } else {
         const pkgName = name.replace(/_/g, '-').toLowerCase();
-        map.set(pkgName, { type: 'dir', path: fullPath });
+        const existing = map.get(pkgName) || {};
+        existing.dir = fullPath;
+        map.set(pkgName, existing);
       }
     }
   } catch (err) {
@@ -299,11 +303,21 @@ function buildPackageDirMap(sitePackages) {
   return map;
 }
 
+/**
+ * 规范化包名用于目录映射查找
+ * - 统一转为小写 + 连字符形式（与 buildPackageDirMap 的 key 格式一致）
+ * @param {string} name - 原始包名
+ * @returns {string} 规范化后的包名
+ */
+function normalizePkgKey(name) {
+  return name.replace(/_/g, '-').toLowerCase();
+}
+
 /** 在映射表中查找包的 .dist-info 条目 */
 function findDistInfoEntry(dirMap, pkgName) {
-  const key = pkgName.toLowerCase();
+  const key = normalizePkgKey(pkgName);
   const entry = dirMap.get(key);
-  return entry && entry.type === 'dist-info' ? entry : null;
+  return entry && entry.distInfo ? { type: 'dist-info', path: entry.distInfo } : null;
 }
 
 /**
@@ -340,18 +354,17 @@ function getFolderSizeCached(dir, cache, depth = 0) {
  */
 function getInstallTimeFast(pkgName, sitePackages, dirMap) {
   if (!sitePackages) return '';
-  const dirKey = pkgName.replace(/-/g, '_').toLowerCase();
-  const distKey = pkgName.replace(/_/g, '-').toLowerCase();
+  const normKey = normalizePkgKey(pkgName);
+  const entry = dirMap.get(normKey);
+  if (!entry) return '';
 
-  const dirEntry = dirMap.get(dirKey);
-  const distEntry = findDistInfoEntry(dirMap, distKey);
-  const target = dirEntry || distEntry;
-
+  // 优先使用 dist-info 目录的修改时间（更准确反映安装时间）
+  const target = entry.distInfo || entry.dir;
   if (target) {
     try {
-      return fs.statSync(target.path).mtime.toISOString().slice(0, 10);
+      return fs.statSync(target).mtime.toISOString().slice(0, 10);
     } catch (err) {
-      logManager.addLog({ action: 'Get install time failed', status: 'failed', type: 'system', detail: `${target.path}: ${err.message}` });
+      logManager.addLog({ action: 'Get install time failed', status: 'failed', type: 'system', detail: `${target}: ${err.message}` });
     }
   }
   return '';
@@ -369,14 +382,13 @@ function getInstallTimeFast(pkgName, sitePackages, dirMap) {
 function estimatePackageSizeFast(pkgName, sitePackages, dirMap, sizeCache) {
   if (!sitePackages) return { size: 0, text: '0 MB' };
 
-  const candidates = [];
-  const dirKey = pkgName.replace(/-/g, '_').toLowerCase();
-  const dirEntry = dirMap.get(dirKey);
-  if (dirEntry && dirEntry.type === 'dir') candidates.push(dirEntry.path);
+  const normKey = normalizePkgKey(pkgName);
+  const entry = dirMap.get(normKey);
+  if (!entry) return { size: 0, text: '-' };
 
-  const distKey = pkgName.replace(/_/g, '-').toLowerCase();
-  const distEntry = findDistInfoEntry(dirMap, distKey);
-  if (distEntry) candidates.push(distEntry.path);
+  const candidates = [];
+  if (entry.dir) candidates.push(entry.dir);
+  if (entry.distInfo) candidates.push(entry.distInfo);
 
   let total = 0;
   for (const c of candidates) {
