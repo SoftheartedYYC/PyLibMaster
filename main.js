@@ -156,7 +156,8 @@ if (!gotTheLock) {
     updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
     envManager.startDetection();      // 后台异步检测 Python 环境
     setupThemeSync();                 // 设置主题跟随系统
-    autoCheckUpdates();               // 启动时静默检查更新
+    autoCheckUpdates();               // 启动时静默检查 pip 包更新
+    autoCheckAppUpdate();             // 启动时自动检查应用新版本
     schedulerManager.startScheduler((title, body) => {  // 启动定时更新调度器
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('scheduler:executed', body);
@@ -249,6 +250,52 @@ async function autoCheckUpdates() {
       } catch { /* 静默失败 */ }
     }, 5000);
   } catch { /* 配置读取失败时跳过 */ }
+}
+
+// ============ 启动时自动检查应用新版本 ============
+
+/**
+ * 启动时自动检查应用新版本
+ * - 仅在配置开启时执行（autoCheckAppUpdate !== false）
+ * - 发现新版本后自动下载安装包
+ * - 下载完成后通过系统通知提醒用户安装
+ * - 延迟 3 秒执行，避免与启动流程竞争网络资源
+ */
+function autoCheckAppUpdate() {
+  try {
+    const cfg = configManager.getConfig();
+    if (cfg.autoCheckAppUpdate === false) return;
+    setTimeout(async () => {
+      try {
+        const result = await updater.checkForUpdates();
+        // electron-updater 配置了 autoDownload 后会自动下载
+        // 下载完成事件（updater:downloaded）会触发渲染进程 UI 提示
+        // 同时发送系统通知确保用户注意到
+        if (result && result.updateInfo && result.updateInfo.version) {
+          const currentVersion = app.getVersion();
+          if (result.updateInfo.version !== currentVersion) {
+            notifyUpdateAvailable(result.updateInfo.version);
+          }
+        }
+      } catch { /* 静默失败，不影响应用启动 */ }
+    }, 3000);
+  } catch { /* 配置读取失败时跳过 */ }
+}
+
+/**
+ * 发送系统通知提醒用户有新版本可用
+ * @param {string} version - 新版本号
+ */
+function notifyUpdateAvailable(version) {
+  try {
+    if (Notification.isSupported()) {
+      const notification = new Notification({
+        title: 'PyLibMaster 发现新版本',
+        body: `新版本 v${version} 可用，正在后台下载安装包，下载完成后将提示您安装。`
+      });
+      notification.show();
+    }
+  } catch { /* 通知发送失败时静默处理 */ }
 }
 
 // ============ IPC 处理器：窗口控制 ============
