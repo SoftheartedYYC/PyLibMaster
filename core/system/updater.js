@@ -94,14 +94,27 @@ function initUpdater(win) {
 /**
  * 检查是否有新版本可用
  * - 防止重复检查（checkInProgress 标志）
- * @returns {Promise<Object>} 检查结果
+ * - 返回纯 JSON 可序列化对象（避免 IPC "object could not be cloned" 错误）
+ * @returns {Promise<Object>} 检查结果（仅含可序列化字段）
  */
 async function checkForUpdates() {
   if (checkInProgress) return { checking: true };
   checkInProgress = true;
   try {
     const result = await autoUpdater.checkForUpdates();
-    return result || { checking: false };
+    // 仅提取可序列化的 updateInfo 字段，避免返回含内部引用的对象
+    if (result && result.updateInfo) {
+      return {
+        checking: false,
+        updateInfo: {
+          version: result.updateInfo.version,
+          releaseDate: result.updateInfo.releaseDate || '',
+          releaseName: result.updateInfo.releaseName || '',
+          releaseNotes: typeof result.updateInfo.releaseNotes === 'string' ? result.updateInfo.releaseNotes : ''
+        }
+      };
+    }
+    return { checking: false };
   } catch (err) {
     checkInProgress = false;
     throw err;
