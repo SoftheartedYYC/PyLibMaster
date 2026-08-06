@@ -72,6 +72,17 @@ function getInstallDir() {
 }
 
 /**
+ * 获取默认存储路径
+ * 优先使用用户数据目录而非安装目录，避免权限问题
+ * @returns {string} 存储路径
+ */
+function getDefaultStoragePath() {
+  // 核心修复：不使用 Program Files 作为存储路径
+  // Windows 下 Program Files 需要管理员权限才能写入
+  return path.join(getConfigDir(), 'storage');
+}
+
+/**
  * 初始化配置管理器
  * - 从配置文件加载配置，或使用默认值创建新配置
  * - 配置文件损坏时自动重建默认配置
@@ -83,8 +94,8 @@ function init() {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   configPath = path.join(dir, 'pylibmaster-config.json');
 
-  // 默认存储路径：安装目录下的 log 文件夹
-  const defaultStorage = path.join(getInstallDir(), 'log');
+  // 初始化默认存储路径
+  const defaultStorage = getDefaultStoragePath();
 
   // 默认配置项
   const defaults = {
@@ -104,6 +115,13 @@ function init() {
       const raw = fs.readFileSync(configPath, 'utf-8');
       const saved = JSON.parse(raw);
       config = { ...defaults, ...saved };
+      
+      // 智能检测：如果配置中存储路径在 Program Files，自动修正
+      if (config.storagePath && config.storagePath.toLowerCase().includes('program files')) {
+        console.warn('[PyLibMaster] 检测到存储路径包含"Program Files"，已自动切换到用户数据目录');
+        config.storagePath = getDefaultStoragePath();
+        saveConfig(); // 自动保存修正后的配置
+      }
     } else {
       // 配置文件不存在，创建默认配置
       config = { ...defaults };
