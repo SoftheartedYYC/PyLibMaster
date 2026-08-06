@@ -10,7 +10,7 @@
  * - 记录更新相关日志
  * 
  * 更新流程：
- * 1. 检查更新（GitHub latest.yml + Gitee Releases API 并行）
+ * 1. 检查更新：GitHub（electron-updater）优先，失败自动回退 Gitee（原生 https 直连，不走系统代理）
  * 2. 发现新版本 → 对两源安装包并行测速
  * 3. 选择较快的源下载（GitHub 用 electron-updater，Gitee 用自建下载器）
  * 4. sha512 校验 → 5. 用户确认安装 → 6. 重启应用
@@ -49,6 +49,8 @@ let checkInProgress = false;
 let activeSource = 'github';
 // Gitee 下载状态（自建下载器进行中时为 true，避免与 electron-updater 事件混淆）
 let giteeDownloading = false;
+// GitHub 检查失败回退 Gitee 期间的标志（抑制 electron-updater error 事件的 UI 弹窗）
+let githubFallback = false;
 // 测速后选定的 Gitee 安装包信息（下载时复用，避免重复调 API）
 let giteeAssetCache = null;
 // Gitee 下载完成后的安装包文件路径（供 quitAndInstall 使用）
@@ -155,6 +157,7 @@ function streamToString(stream) {
 /**
  * 从 Gitee Releases API 获取最新发行版信息
  * - 解析附件列表，定位安装包（.exe）与 latest.yml
+ * - 使用 Node 原生 https（直连，不走系统代理，国内稳定）
  * @returns {Promise<Object|null>} { version, exeUrl, ymlUrl } 或 null（无发行版）
  */
 async function fetchGiteeRelease() {
@@ -384,6 +387,7 @@ function initUpdater(win) {
   // 更新过程中发生错误
   autoUpdater.on('error', (err) => {
     if (giteeDownloading) return; // Gitee 下载中的错误由下载器自行处理
+    if (githubFallback) return;   // GitHub 检查失败回退 Gitee 期间不弹错误，由 checkViaGitee 接管
     send('updater:error', { message: err.message });
     logManager.addLog({ action: 'Updater error', status: 'failed', type: 'system', detail: err.message });
     checkInProgress = false;
@@ -391,8 +395,42 @@ function initUpdater(win) {
 }
 
 /**
+ * 通过 Gitee 源检查更新（兜底通道）
+ * - electron-updater 检查 GitHub 失败时调用（如网络/代理导致 ERR_CONNECTION_CLOSED）
+ * - 发现新版本时与 GitHub 通道行为一致：通知 UI 并触发测速下载
+ * @returns {Promise<Object>} 检查结果
+ */
+async function checkViaGitee() {
+  const release = await fetchGiteeRelease();
+  if (!release) {
+    checkInProgress = false;
+    send('updater:error', { message: 'Gitee 源检查失败：未找到可用发行版' });
+    return { checking: false };
+  }
+  const currentVersion = require('electron').app.getVersion();
+  logManager.addLog({ action: 'Update check via Gitee fallback', status: 'ok', type: 'system', detail: `latest=v${release.version}` });
+
+  if (release.version === currentVersion) {
+    // 已是最新版
+    send('updater:not-available', { version: release.version, releaseDate: '', releaseName: '', releaseNotes: '' });
+    checkInProgress = false;
+    return { checking: false, updateInfo: { version: release.version, releaseDate: '', releaseName: '', releaseNotes: '' } };
+  }
+
+  // 发现新版本：通知 UI 并异步测速下载
+  giteeAssetCache = release;
+  send('updater:available', { version: release.version, releaseDate: '', releaseName: '', releaseNotes: '' });
+  startSpeedTestAndDownload(release.version).catch((err) => {
+    send('updater:error', { message: err && err.message ? String(err.message) : '下载更新失败' });
+    checkInProgress = false;
+  });
+  return { checking: false, updateInfo: { version: release.version, releaseDate: '', releaseName: '', releaseNotes: '' } };
+}
+
+/**
  * 检查是否有新版本可用（双源）
  * - 防止重复检查（checkInProgress 标志）
+ * - 优先 electron-updater（GitHub），失败自动回退 Gitee 直连检查
  * - 发现新版本后自动测速并选择较快的源下载
  * - 返回纯 JSON 可序列化对象（避免 IPC "object could not be cloned" 错误）
  * @returns {Promise<Object>} 检查结果（仅含可序列化字段）
@@ -432,10 +470,14 @@ async function checkForUpdates() {
     }
     return response;
   } catch (err) {
-    checkInProgress = false;
-    // 重要：抛出纯错误消息，避免原始 Error 对象上挂着的不可序列化属性
-    // （如 electron-updater 内部引用）导致 IPC "object could not be cloned" 错误
-    throw new Error(err && err.message ? String(err.message) : '检查更新失败');
+    // 3. GitHub 检查失败（如代理中断导致 ERR_CONNECTION_CLOSED）→ 回退 Gitee 直连检查
+    githubFallback = true;
+    logManager.addLog({ action: 'GitHub update check failed, fallback to Gitee', status: 'failed', type: 'system', detail: err.message });
+    try {
+      return await checkViaGitee();
+    } finally {
+      githubFallback = false;
+    }
   }
 }
 

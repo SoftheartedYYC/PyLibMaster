@@ -9,6 +9,7 @@
 
 <p>
   <a href="https://github.com/SoftheartedYYC/PyLibMaster/releases"><img src="https://img.shields.io/github/v/release/SoftheartedYYC/PyLibMaster?color=0969DA&label=version&logo=github" alt="Release" /></a>
+  <a href="https://gitee.com/soft-hearted-yyc/PyLibMaster"><img src="https://img.shields.io/badge/Gitee-%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93-C71D23?logo=gitee" alt="Gitee" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-%E9%9D%9E%E5%95%86%E4%B8%9A%E5%85%8D%E8%B4%B9-orange" alt="License" /></a>
   <img src="https://img.shields.io/badge/platform-Windows-0078D4?logo=windows" alt="Platform" />
   <img src="https://img.shields.io/badge/node-%3E%3D24-339933?logo=nodedotjs" alt="Node" />
@@ -17,6 +18,7 @@
 
 <p>
   <a href="https://github.com/SoftheartedYYC/PyLibMaster/releases"><b>⬇️ 下载安装包</b></a> &nbsp;|&nbsp;
+  <a href="https://gitee.com/soft-hearted-yyc/PyLibMaster/releases"><b>⬇️ Gitee 下载（国内加速）</b></a> &nbsp;|&nbsp;
   <a href="docs/zh/content/项目概述.md"><b>📖 中文文档</b></a> &nbsp;|&nbsp;
   <a href="docs/en/content/Getting%20Started.md"><b>🌐 English Docs</b></a> &nbsp;|&nbsp;
   <a href="docs/CHANGELOG.md"><b>📝 更新日志</b></a>
@@ -76,8 +78,10 @@ PyLibMaster 是一款基于 **Electron** 开发的 Windows 桌面应用，让你
 
 ### 🔄 自动更新
 - 启动后自动检查新版本，发现新版本自动下载安装包
+- **双源智能选路**：GitHub + Gitee 两个更新源，下载前自动测速选择较快的源
+- GitHub 源不可用时自动回退 Gitee 源检查更新（国内网络更稳定）
+- Gitee 下载带 sha512 完整性校验，保障安装包安全
 - 下载完成后系统通知提醒，一键退出并安装
-- 更新元数据基于 GitHub Releases，无需额外更新服务器
 
 ---
 
@@ -85,7 +89,7 @@ PyLibMaster 是一款基于 **Electron** 开发的 Windows 桌面应用，让你
 
 ### 方式一：下载安装（推荐）
 
-1. 访问 [Releases](https://github.com/SoftheartedYYC/PyLibMaster/releases) 页面
+1. 访问 [GitHub Releases](https://github.com/SoftheartedYYC/PyLibMaster/releases) 或 [Gitee 发行版](https://gitee.com/soft-hearted-yyc/PyLibMaster/releases)（国内推荐）
 2. 下载最新版 `PyLibMaster-Setup-x.x.x.exe`
 3. 双击安装，无需额外配置
 
@@ -96,8 +100,9 @@ PyLibMaster 是一款基于 **Electron** 开发的 Windows 桌面应用，让你
 ### 方式二：从源码运行
 
 ```bash
-# 克隆仓库
+# 克隆仓库（GitHub 或 Gitee 镜像任选其一）
 git clone https://github.com/SoftheartedYYC/PyLibMaster.git
+# git clone https://gitee.com/soft-hearted-yyc/PyLibMaster.git
 cd PyLibMaster
 
 # 安装依赖
@@ -245,6 +250,7 @@ PyLibMaster/
 ## 🤝 参与贡献
 
 欢迎提交 [Issue](https://github.com/SoftheartedYYC/PyLibMaster/issues) 和 [Pull Request](https://github.com/SoftheartedYYC/PyLibMaster/pulls)！
+国内用户也可通过 [Gitee 仓库](https://gitee.com/soft-hearted-yyc/PyLibMaster)（镜像同步）参与。
 
 ---
 
