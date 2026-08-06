@@ -625,7 +625,7 @@ async function importEnv() {
     await api.importRequirements(filePath, {});
     await refreshAll();
     showToast(t('env.imported'), 'ok');
-    sendDesktopNotification(t('env.imported'));
+    sendDesktopNotification(t('env.imported'), currentLang === 'zh' ? '环境导入' : 'Import Done');
   } catch (err) {
     showToast(currentLang === 'zh' ? `导入失败: ${err.message}` : `Import failed: ${err.message}`, 'err');
   }
@@ -804,11 +804,13 @@ async function runSchedulerNow() {
 
 /**
  * 发送桌面通知（如果配置开启）
+ * - title 使用简短操作描述（Windows 通知中心已自动显示应用名 PyLibMaster，无需重复）
  * @param {string} body - 通知内容
+ * @param {string} [title] - 通知标题（默认为“操作完成”）
  */
-function sendDesktopNotification(body) {
+function sendDesktopNotification(body, title) {
   if (appConfig.desktopNotify !== false) {
-    api.sendNotification('PyLibMaster', body).catch(() => {});
+    api.sendNotification(title || (currentLang === 'zh' ? '操作完成' : 'Done'), body).catch(() => {});
   }
 }
 
@@ -946,7 +948,7 @@ async function execTemplateCreate() {
   try {
     await api.createFromTemplate({ templateId: selectedTemplateId, venvName, pythonPath });
     showToast(t('tpl.created'), 'ok');
-    sendDesktopNotification(t('tpl.created'));
+    sendDesktopNotification(t('tpl.created'), currentLang === 'zh' ? '模板创建' : 'Template Created');
     cancelTemplateSelect();
     document.getElementById('tpl-venv-name').value = '';
     await refreshVenvs();
@@ -1023,7 +1025,7 @@ async function restoreEnvSnapshot(snapshotId) {
   try {
     await api.restoreSnapshot(snapshotId, env.path);
     showToast(t('tpl.restored'), 'ok');
-    sendDesktopNotification(t('tpl.restored'));
+    sendDesktopNotification(t('tpl.restored'), currentLang === 'zh' ? '快照恢复' : 'Snapshot Restored');
     await refreshAll();
   } catch (err) {
     showToast(currentLang === 'zh' ? `回滚失败: ${err.message}` : `Restore failed: ${err.message}`, 'err');
@@ -1241,7 +1243,7 @@ async function installFromPypi() {
     const operationId = generateOperationId();
     await api.installPackages([currentPypiPackage], { parallel: false, retry: true, rollback: false, operationId });
     showToast(`${t('pypi.installed')}: ${currentPypiPackage}`, 'ok');
-    sendDesktopNotification(`${t('pypi.installed')}: ${currentPypiPackage}`);
+    sendDesktopNotification(`${t('pypi.installed')}: ${currentPypiPackage}`, currentLang === 'zh' ? '安装完成' : 'Install Done');
   } catch (err) {
     showToast(currentLang === 'zh' ? `安装失败: ${err.message}` : `Install failed: ${err.message}`, 'err');
   } finally {

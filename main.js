@@ -151,6 +151,8 @@ if (!gotTheLock) {
    * 3. 启动 Python 环境检测
    */
   app.whenReady().then(() => {
+    // 设置 AppUserModelID，确保 Windows 通知中心显示 "PyLibMaster" 而非 "electron.app.PyLibMaster"
+    app.setAppUserModelId('com.softheartedyyc.pylibmaster');
     createWindow();
     createTray();             // 创建系统托盘图标
     updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
@@ -290,7 +292,7 @@ function notifyUpdateAvailable(version) {
   try {
     if (Notification.isSupported()) {
       const notification = new Notification({
-        title: 'PyLibMaster 发现新版本',
+        title: '发现新版本',
         body: `新版本 v${version} 可用，正在后台下载安装包，下载完成后将提示您安装。`
       });
       notification.show();

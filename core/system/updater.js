@@ -75,7 +75,7 @@ function initUpdater(win) {
       const { Notification } = require('electron');
       if (Notification.isSupported()) {
         const notification = new Notification({
-          title: 'PyLibMaster 更新已就绪',
+          title: '更新已就绪',
           body: `v${info.version} 安装包已下载完成，点击应用内“立即安装”按钮即可升级。`
         });
         notification.show();

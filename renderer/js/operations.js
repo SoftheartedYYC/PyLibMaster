@@ -100,7 +100,7 @@ async function doUninstall(names, withBackup) {
     showToast(currentLang === 'zh'
       ? `已卸载 ${names.length} 个库${withBackup ? '（含备份）' : ''}`
       : `Uninstalled ${names.length} package(s)${withBackup ? ' (with backup)' : ''}`, 'ok');
-    sendDesktopNotification(currentLang === 'zh' ? `已卸载 ${names.length} 个库` : `Uninstalled ${names.length} package(s)`);
+    sendDesktopNotification(currentLang === 'zh' ? `已卸载 ${names.length} 个库` : `Uninstalled ${names.length} package(s)`, currentLang === 'zh' ? '卸载完成' : 'Uninstall Done');
   } catch (err) {
     finishProgress(false);
     showToast(currentLang === 'zh' ? `卸载失败: ${err.message}` : `Uninstall failed: ${err.message}`, 'err');
@@ -205,7 +205,7 @@ async function updateAll() {
       finishProgress(true);
       showToast(currentLang === 'zh' ? `已更新 ${successCount} 个库` : `Updated ${successCount} packages`, 'ok');
     }
-    sendDesktopNotification(currentLang === 'zh' ? `更新完成：${successCount} 成功，${failedCount} 失败` : `Update done: ${successCount} ok, ${failedCount} failed`);
+    sendDesktopNotification(currentLang === 'zh' ? `更新完成：${successCount} 成功，${failedCount} 失败` : `Update done: ${successCount} ok, ${failedCount} failed`, currentLang === 'zh' ? '更新完成' : 'Update Done');
   } catch (err) {
     finishProgress(false);
     showToast(currentLang === 'zh' ? `更新失败: ${err.message}` : `Update failed: ${err.message}`, 'err');
@@ -357,7 +357,7 @@ async function startInstall() {
       finishProgress(true);
       showToast(currentLang === 'zh' ? `成功安装 ${installedCount} 个库` : `Installed ${installedCount} package(s)`, 'ok');
     }
-    sendDesktopNotification(currentLang === 'zh' ? `安装完成：${installedCount} 成功，${failedCount} 失败` : `Install done: ${installedCount} ok, ${failedCount} failed`);
+    sendDesktopNotification(currentLang === 'zh' ? `安装完成：${installedCount} 成功，${failedCount} 失败` : `Install done: ${installedCount} ok, ${failedCount} failed`, currentLang === 'zh' ? '安装完成' : 'Install Done');
     input.value = '';
   } catch (err) {
     finishProgress(false);
