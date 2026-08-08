@@ -323,7 +323,11 @@ function bindMirrorDragEvents() {
 function renderEnvs() {
   const list = document.getElementById('env-list');
   if (envs.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-state-text">${currentLang === 'zh' ? '未检测到 Python 环境' : 'No Python environment detected'}</div><div class="empty-state-sub">${currentLang === 'zh' ? '请检查系统是否安装了 Python' : 'Please check if Python is installed'}</div></div>`;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-text">${currentLang === 'zh' ? '未检测到 Python 环境' : 'No Python environment detected'}</div>
+      <div class="empty-state-sub">${currentLang === 'zh' ? '可在下方一键安装 Python，自动配置环境变量' : 'Install Python with one click below, PATH will be configured automatically'}</div>
+      <button class="btn btn-primary" style="margin-top:12px;" onclick="document.getElementById('python-install-card').scrollIntoView({behavior:'smooth'})">${currentLang === 'zh' ? '立即安装 Python' : 'Install Python Now'}</button>
+    </div>`;
     return;
   }
   list.innerHTML = envs.map((e, i) => `

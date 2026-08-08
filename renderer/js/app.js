@@ -82,6 +82,8 @@ document.getElementById('setting-retry').addEventListener('change', e => api.set
 api.onProgress(updateProgressFromOutput);
 // 绑定应用自动更新事件
 bindUpdaterEvents();
+// 绑定 Python 一键安装进度事件并初始化版本下拉
+bindPythonInstallEvents();
 
 // ---- 主题跟随系统监听 ----
 api.onThemeChanged(async (theme) => {

@@ -1595,11 +1595,65 @@ async function healthCheck() {
   return report;
 }
 
+// ============ PyPI 实时搜索（安装页搜索建议） ============
+
+/**
+ * 搜索 PyPI 上的包（通过 PyPI JSON API 精确匹配）
+ * - 用于安装页输入时的实时搜索建议（包名/描述/最新版本）
+ * - 搜索失败或无结果时返回空列表，不抛错（避免阻断输入体验）
+ * @param {string} keyword - 搜索关键词（包名）
+ * @returns {Promise<Object>} { results: [{ name, summary, version }] }
+ */
+async function searchPyPI(keyword) {
+  if (!keyword || typeof keyword !== 'string') {
+    throw new Error('Invalid search keyword: must be a non-empty string');
+  }
+  const kw = keyword.trim();
+  if (!kw || kw.length > 200) {
+    throw new Error('Invalid search keyword: too long (max 200 characters)');
+  }
+  if (!VALID_PACKAGE_NAME.test(kw)) {
+    return { results: [] };
+  }
+
+  const https = require('https');
+  const url = `https://pypi.org/pypi/${encodeURIComponent(kw)}/json`;
+
+  return new Promise((resolve) => {
+    const req = https.get(url, { timeout: 10000 }, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume();
+        resolve({ results: [] });
+        return;
+      }
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          resolve({
+            results: [{
+              name: json.info.name,
+              summary: json.info.summary || '',
+              version: json.info.version || ''
+            }]
+          });
+        } catch {
+          resolve({ results: [] });
+        }
+      });
+    });
+    req.on('timeout', () => { req.destroy(); resolve({ results: [] }); });
+    req.on('error', () => resolve({ results: [] }));
+  });
+}
+
 module.exports = {
   listInstalled,
   listInstalledCached,
   listOutdated,
   searchPackage,
+  searchPyPI,
   installPackages,
   installFromFile,
   uninstallPackages,

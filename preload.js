@@ -30,6 +30,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCurrentEnv: () => ipcRenderer.invoke('env:getCurrent'),
   switchEnvironment: (envPath) => ipcRenderer.invoke('env:switch', envPath),
 
+  // ============ Python 一键安装 ============
+  // 获取可安装版本列表、执行安装、监听安装进度
+  listPythonVersions: () => ipcRenderer.invoke('python:listVersions'),
+  installPython: (version) => ipcRenderer.invoke('python:install', version),
+  onPythonInstallProgress: (callback) => {
+    ipcRenderer.removeAllListeners('python:install-progress');
+    ipcRenderer.on('python:install-progress', (event, data) => callback(data));
+  },
+
   // ============ 虚拟环境管理 ============
   // 创建、列出、删除虚拟环境
   createVenv: (options) => ipcRenderer.invoke('venv:create', options),
@@ -43,6 +52,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   listInstalledCached: () => ipcRenderer.invoke('pip:listCached'),
   listOutdated: () => ipcRenderer.invoke('pip:outdated'),
   searchPackage: (keyword) => ipcRenderer.invoke('pip:search', keyword),
+  // 搜索 PyPI 包信息（安装页实时搜索建议）
+  searchPyPI: (keyword) => ipcRenderer.invoke('pip:searchPyPI', keyword),
   // 获取包详细信息（pip show）
   showPackageInfo: (pkgName) => ipcRenderer.invoke('pip:showInfo', pkgName),
   // 获取包依赖树

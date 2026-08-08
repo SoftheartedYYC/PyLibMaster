@@ -28,6 +28,7 @@ const templateManager = require('./core/operations/templateManager');   // 项�
 const auditManager = require('./core/operations/auditManager');         // 安全漏洞扫描
 const undoManager = require('./core/operations/undoManager');           // 操作撤销管理
 const explorerManager = require('./core/system/explorerManager');   // Windows 资源管理器集成
+const pythonInstaller = require('./core/system/pythonInstaller');     // Python 一键安装
 
 // 全局窗口引用
 let mainWindow;
@@ -330,6 +331,23 @@ ipcMain.handle('env:getCurrent', () => envManager.getCurrent());
 // 切换到指定的 Python 环境
 ipcMain.handle('env:switch', (event, envPath) => envManager.switchEnvironment(envPath));
 
+// ============ IPC 处理器：Python 一键安装 ============
+// 获取可安装的 Python 版本列表
+ipcMain.handle('python:listVersions', () => pythonInstaller.listAvailableVersions());
+// 一键安装 Python（下载进度/安装阶段通过 python:install-progress 事件推送）
+ipcMain.handle('python:install', async (event, version) => {
+  return pythonInstaller.installPython(version, {
+    onProgress: (p) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('python:install-progress', {
+          phase: p.phase || 'download',
+          percent: Number(p.percent) || 0
+        });
+      }
+    }
+  });
+});
+
 // ============ IPC 处理器：虚拟环境管理 ============
 
 // 创建虚拟环境
@@ -359,6 +377,8 @@ ipcMain.handle('pip:listCached', async () => pipManager.listInstalledCached());
 ipcMain.handle('pip:outdated', async () => pipManager.listOutdated());
 // 搜索 PyPI 上的包（使用 pip index versions）
 ipcMain.handle('pip:search', async (event, keyword) => pipManager.searchPackage(keyword));
+// 搜索 PyPI 包信息（JSON API，返回包名/描述/最新版本，用于安装页实时搜索建议）
+ipcMain.handle('pip:searchPyPI', async (event, keyword) => pipManager.searchPyPI(keyword));
 // 获取包的详细信息（pip show）
 ipcMain.handle('pip:showInfo', async (event, pkgName) => pipManager.showPackageInfo(pkgName));
 // 获取包的依赖树

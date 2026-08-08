@@ -136,9 +136,12 @@
       <div class="page-desc" data-i18n="install.desc">搜索、安装 Python 库，支持拖拽批量安装</div>
 
       <div class="search-bar">
-        <input class="search-input" type="text" id="install-search" data-i18n-placeholder="install.search" placeholder="输入需要安装库的名称，多个库以空格间隔开" onkeydown="if(event.key==='Enter')startInstall()">
+        <input class="search-input" type="text" id="install-search" data-i18n-placeholder="install.search" placeholder="输入需要安装库的名称，多个库以空格间隔开" oninput="onInstallSearchInput()" onkeydown="if(event.key==='Enter')startInstall()">
         <button class="btn btn-primary" id="btn-do-install" onclick="startInstall()"><span class="spinner"></span><span data-i18n="btn.install">安装</span></button>
       </div>
+
+      <!-- PyPI 实时搜索结果（输入时显示包名/描述/最新版本，点击可直接安装） -->
+      <div class="card" id="install-search-results" style="display:none; margin-bottom:16px;"></div>
 
       <div class="dropzone" id="dropzone">
         <div class="dropzone-icon">
@@ -514,6 +517,20 @@
       <div class="card">
         <div class="card-title-sm" data-i18n="env.pythonEnv">Python 环境</div>
         <div id="env-list"></div>
+      </div>
+
+      <!-- Python 一键安装（未检测到环境时使用，自动配置 PATH 环境变量） -->
+      <div class="card" id="python-install-card">
+        <div class="card-title-sm" data-i18n="env.installPython">安装 Python</div>
+        <div class="setting-desc" data-i18n="env.installPythonDesc">未检测到 Python 环境？选择版本一键安装，自动配置 PATH 环境变量</div>
+        <div style="display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+          <select id="python-install-version" class="search-input" style="flex:1; min-width:220px;"></select>
+          <button class="btn btn-sm btn-primary" id="btn-install-python" onclick="startPythonInstall()"><span class="spinner"></span><span data-i18n="env.installPythonBtn">安装</span></button>
+        </div>
+        <div id="python-install-progress" style="display:none; margin-top:12px;">
+          <div class="setting-desc" id="python-install-status" style="margin:0 0 8px 0;"></div>
+          <div class="progress-bar"><div class="progress-fill" id="python-install-bar" style="width:0%"></div></div>
+        </div>
       </div>
 
       <div class="card">

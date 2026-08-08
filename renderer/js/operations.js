@@ -30,6 +30,134 @@ async function cancelCurrentOperation() {
   }
 }
 
+// ---- 安装页实时搜索建议 ----
+
+let installSearchTimer = null;
+
+/**
+ * 安装搜索框输入事件（600ms 防抖）
+ * - 单个包名时实时查询 PyPI，展示搜索结果卡片
+ * - 多个包名（空格/逗号分隔）时不搜索，保留原有直接安装行为
+ */
+function onInstallSearchInput() {
+  clearTimeout(installSearchTimer);
+  const query = document.getElementById('install-search').value.trim();
+  const box = document.getElementById('install-search-results');
+  if (!query || /[\s,]/.test(query)) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+  installSearchTimer = setTimeout(async () => {
+    try {
+      const { results } = await api.searchPyPI(query);
+      renderInstallSearchResults(results || []);
+    } catch {
+      box.style.display = 'none';
+    }
+  }, 600);
+}
+
+/**
+ * 渲染 PyPI 搜索结果卡片
+ * @param {Array} results - [{ name, summary, version }]
+ */
+function renderInstallSearchResults(results) {
+  const box = document.getElementById('install-search-results');
+  if (results.length === 0) {
+    box.style.display = 'block';
+    box.innerHTML = `<div class="card-title-sm">${t('install.searchResults')}</div>
+      <div class="empty-state" style="padding:12px 0;"><div class="empty-state-sub">${t('install.searchNoResult')}</div></div>`;
+    return;
+  }
+  box.style.display = 'block';
+  box.innerHTML = `<div class="card-title-sm">${t('install.searchResults')}</div>` + results.map(r => `
+    <div class="env-card" style="margin-top:8px;">
+      <div onclick="fillInstallSearch('${escapeHtml(r.name)}')" style="cursor:pointer; flex:1;">
+        <div class="env-name">${escapeHtml(r.name)} <span class="version-badge" style="margin-left:6px;">v${escapeHtml(r.version)}</span></div>
+        <div class="env-path">${escapeHtml(r.summary || '')}</div>
+      </div>
+      <button class="btn btn-sm btn-primary" style="flex-shrink:0;" onclick="installSearchedPackage('${escapeHtml(r.name)}')">${t('btn.install')}</button>
+    </div>
+  `).join('');
+}
+
+/** 点击搜索结果包名：填入搜索框（用户可继续调整版本选项后安装） */
+function fillInstallSearch(name) {
+  document.getElementById('install-search').value = name;
+  document.getElementById('install-search-results').style.display = 'none';
+}
+
+/** 点击搜索结果"安装"按钮：填入包名并立即安装 */
+function installSearchedPackage(name) {
+  document.getElementById('install-search').value = name;
+  document.getElementById('install-search-results').style.display = 'none';
+  startInstall();
+}
+
+// ---- Python 一键安装 ----
+
+/** 加载可安装的 Python 版本下拉选项 */
+async function loadPythonVersionOptions() {
+  const sel = document.getElementById('python-install-version');
+  if (!sel || sel.options.length > 0) return;
+  try {
+    const versions = await api.listPythonVersions();
+    sel.innerHTML = versions.map(v =>
+      `<option value="${v.version}" ${v.recommended ? 'selected' : ''}>${escapeHtml(v.label)}</option>`
+    ).join('');
+  } catch { /* 加载失败时静默处理 */ }
+}
+
+/** 一键安装 Python（下载 + 静默安装 + 自动配置 PATH） */
+async function startPythonInstall() {
+  const sel = document.getElementById('python-install-version');
+  const btn = document.getElementById('btn-install-python');
+  const progressEl = document.getElementById('python-install-progress');
+  const version = sel.value;
+  if (!version) return;
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+
+  try {
+    await api.installPython(version);
+    showToast(t('env.installPythonDone'), 'ok');
+    sendDesktopNotification(t('env.installPythonDone'), t('env.installPython'));
+    await refreshEnvs();
+    renderEnvs();
+  } catch (err) {
+    showToast(t('env.installPythonFail').replace('{error}', err.message), 'err');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    setTimeout(() => { progressEl.style.display = 'none'; }, 3000);
+  }
+}
+
+/** 绑定 Python 安装进度事件并初始化版本下拉 */
+function bindPythonInstallEvents() {
+  api.onPythonInstallProgress((p) => {
+    const progressEl = document.getElementById('python-install-progress');
+    const statusEl = document.getElementById('python-install-status');
+    const barEl = document.getElementById('python-install-bar');
+    if (!statusEl || !barEl) return;
+    progressEl.style.display = 'block';
+    if (p.phase === 'download') {
+      statusEl.textContent = t('env.pyDownloading').replace('{percent}', p.percent || 0);
+      barEl.style.width = (p.percent || 0) + '%';
+    } else if (p.phase === 'install') {
+      statusEl.textContent = t('env.pyInstalling');
+      barEl.style.width = '100%';
+    } else {
+      statusEl.textContent = t('env.pyDone');
+      barEl.style.width = '100%';
+    }
+  });
+  loadPythonVersionOptions();
+}
+
 // ---- 卸载操作 ----
 
 /**
