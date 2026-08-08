@@ -93,6 +93,8 @@ PyLibMaster 是一款基于 **Electron** 开发的 Windows 桌面应用，让你
 2. 下载最新版 `PyLibMaster-Setup-x.x.x.exe`
 3. 双击安装，无需额外配置
 
+> 🎒 **绿色版（免安装）**：下载 `PyLibMaster-x.x.x-Portable.exe`，双击直接运行，无需安装，可放 U 盘随身携带（绿色版不支持应用内自动更新）。
+
 > ⚠️ 应用未做代码签名，Windows SmartScreen 可能提示 **"未知发布者"**，点击 **"仍要运行"** 即可。
 >
 > 💡 应用数据（配置、日志、备份）存储在用户数据目录 `%APPDATA%\PyLibMaster`，卸载应用不会丢失。

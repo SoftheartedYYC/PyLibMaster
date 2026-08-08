@@ -1,6 +1,6 @@
 {
   "name": "pylibmaster",
-  "version": "1.5.33",
+  "version": "1.5.34",
   "description": "Python 库管理工具",
   "main": "main.js",
   "author": "SoftheartedYYC",
@@ -30,6 +30,7 @@
     "appId": "com.softheartedyyc.pylibmaster",
     "productName": "PyLibMaster",
     "icon": "renderer/assets/icon.ico",
+    "compression": "maximum",
     "directories": {
       "output": "dist"
     },
@@ -53,10 +54,19 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "signAndEditExecutable": true,
       "verifyUpdateCodeSignature": false
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-Portable.${ext}"
     },
     "nsis": {
       "oneClick": false,

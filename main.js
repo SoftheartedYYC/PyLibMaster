@@ -156,11 +156,17 @@ if (!gotTheLock) {
     app.setAppUserModelId('com.softheartedyyc.pylibmaster');
     createWindow();
     createTray();             // 创建系统托盘图标
-    updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
+    // 绿色版（portable）不支持 electron-updater 自动更新，跳过更新模块避免报错
+    const isPortable = !!process.env.PORTABLE_EXECUTABLE_DIR;
+    if (!isPortable) {
+      updater.initUpdater(mainWindow);  // 绑定更新事件到窗口
+    }
     envManager.startDetection();      // 后台异步检测 Python 环境
     setupThemeSync();                 // 设置主题跟随系统
     autoCheckUpdates();               // 启动时静默检查 pip 包更新
-    autoCheckAppUpdate();             // 启动时自动检查应用新版本
+    if (!isPortable) {
+      autoCheckAppUpdate();             // 启动时自动检查应用新版本
+    }
     schedulerManager.startScheduler((title, body) => {  // 启动定时更新调度器
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('scheduler:executed', body);
@@ -505,7 +511,13 @@ ipcMain.handle('config:setBulk', (event, updates) => configManager.setBulk(updat
 // ============ IPC 处理器：自动更新 ============
 
 // 检查是否有新版本可用（双源：GitHub + Gitee，自动测速选源）
-ipcMain.handle('updater:check', async () => updater.checkForUpdates());
+ipcMain.handle('updater:check', async () => {
+  // 绿色版不支持应用内自动更新，给出明确提示（渲染进程会 toast 展示）
+  if (process.env.PORTABLE_EXECUTABLE_DIR) {
+    throw new Error('绿色版不支持应用内自动更新，请前往 GitHub/Gitee 发行版页面下载最新版本');
+  }
+  return updater.checkForUpdates();
+});
 // 退出应用并安装已下载的更新
 ipcMain.handle('updater:install', () => updater.quitAndInstall());
 // 获取当前生效的下载源（github/gitee）

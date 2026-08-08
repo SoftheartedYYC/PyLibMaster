@@ -90,6 +90,11 @@ async function main() {
     `PyLibMaster-Setup-${version}.exe.blockmap`,
     'latest.yml'
   ];
+  // 绿色版（portable）存在时一并上传
+  const portableFile = `PyLibMaster-${version}-Portable.exe`;
+  if (fs.existsSync(path.join(distDir, portableFile))) {
+    files.push(portableFile);
+  }
   // 校验文件存在
   for (const f of files) {
     const p = path.join(distDir, f);
